@@ -1,0 +1,91 @@
+Callback: 
+
+ Performance counter stats for 'python more_video_control_cb.py':
+
+         92.391926      task-clock (msec)         #    0.009 CPUs utilized
+                45      context-switches          #    0.487 K/sec
+                 2      cpu-migrations            #    0.022 K/sec
+               557      page-faults               #    0.006 M/sec
+        61,606,713      cycles                    #    0.667 GHz
+        30,264,739      instructions              #    0.49  insns per cycle
+
+      10.233327287 seconds time elapsed
+
+No sleep:
+
+ Performance counter stats for 'python more_video_control.py':
+
+       9899.009661      task-clock (msec)         #    0.980 CPUs utilized
+               945      context-switches          #    0.095 K/sec
+                30      cpu-migrations            #    0.003 K/sec
+               620      page-faults               #    0.063 K/sec
+    11,786,717,712      cycles                    #    1.191 GHz
+     8,795,947,491      instructions              #    0.75  insns per cycle
+
+      10.099177592 seconds time elapsed
+
+20 us:
+
+ Performance counter stats for 'python more_video_control.py':
+
+       2891.364629      task-clock (msec)         #    0.286 CPUs utilized
+            94,495      context-switches          #    0.033 M/sec
+                 3      cpu-migrations            #    0.001 K/sec
+               621      page-faults               #    0.215 K/sec
+     3,242,977,983      cycles                    #    1.122 GHz
+     1,823,436,050      instructions              #    0.56  insns per cycle
+
+      10.112521989 seconds time elapsed
+
+200 us:
+
+ Performance counter stats for 'python more_video_control.py':
+
+       1554.360363      task-clock (msec)         #    0.154 CPUs utilized
+            33,287      context-switches          #    0.021 M/sec
+                 1      cpu-migrations            #    0.001 K/sec
+               622      page-faults               #    0.400 K/sec
+     1,186,663,806      cycles                    #    0.763 GHz
+       657,934,639      instructions              #    0.55  insns per cycle
+
+      10.113472124 seconds time elapsed
+
+2 ms:
+
+ Performance counter stats for 'python more_video_control.py':
+
+        385.932953      task-clock (msec)         #    0.038 CPUs utilized
+             4,777      context-switches          #    0.012 M/sec
+                 5      cpu-migrations            #    0.013 K/sec
+               619      page-faults               #    0.002 M/sec
+       276,525,944      cycles                    #    0.717 GHz
+       125,490,160      instructions              #    0.45  insns per cycle
+
+      10.121483823 seconds time elapsed
+
+20 ms:
+
+ Performance counter stats for 'python more_video_control.py':
+
+        152.592659      task-clock (msec)         #    0.015 CPUs utilized
+               555      context-switches          #    0.004 M/sec
+                 3      cpu-migrations            #    0.020 K/sec
+               622      page-faults               #    0.004 M/sec
+        99,305,739      cycles                    #    0.651 GHz
+        43,023,222      instructions              #    0.43  insns per cycle
+
+      10.132138495 seconds time elapsed
+
+200 ms:
+
+ Performance counter stats for 'python more_video_control.py':
+
+         71.693698      task-clock (msec)         #    0.007 CPUs utilized
+                61      context-switches          #    0.851 K/sec
+                 1      cpu-migrations            #    0.014 K/sec
+               622      page-faults               #    0.009 M/sec
+        72,329,887      cycles                    #    1.009 GHz
+        34,015,604      instructions              #    0.47  insns per cycle
+
+      10.083629936 seconds time elapsed
+

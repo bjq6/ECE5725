@@ -1,0 +1,9 @@
+Hit at (139, 84)
+Hit at (171, 129)
+Hit at (226, 58)
+Hit at (141, 77)
+Hit at (101, 132)
+Hit at (87, 216)
+Hit at (80, 224)
+Hit at (280, 227)
+Quitting...
