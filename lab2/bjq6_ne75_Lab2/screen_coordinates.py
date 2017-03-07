@@ -1,3 +1,9 @@
+# ----------------
+# screen_coordinates.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Feb 27, 2017
+# ----------------
+
 import pygame # Import Library and initialize pygame
 import RPi.GPIO as gpio
 import os

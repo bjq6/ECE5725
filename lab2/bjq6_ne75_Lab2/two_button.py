@@ -1,3 +1,9 @@
+# ----------------
+# two_button.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Feb 27, 2017
+# ----------------
+
 import pygame # Import Library and initialize pygame
 import RPi.GPIO as gpio
 import os
@@ -36,16 +42,11 @@ class Button:
 	def draw(self):
 		screen.blit(self.label, self.pos)
 
-mainMenu = [	Button((260,200),"Quit"),
-		Button((60,200),"Start")]
+buttons = [	Button((260,220),"Quit"),
+		Button((60,220),"Start")]
 
-playMenu = [	Button((240,200), "Back"),
-		Button((40,200), "Pause"),
-		Button((120, 200), "Fast"),
-		Button((180, 200), "Slow")]
-
-def drawMenu(m):	
-	for b in m:
+def drawMenu():	
+	for b in buttons:
 		b.draw()
 
 class Ball:
@@ -64,11 +65,10 @@ def collision(b1, b2):
 def update_location(ballList):
 
         for ball in ballList:
-                if (not pause):
-			ball.ballrect = ball.ballrect.move(ball.speed)
-                if (ball.ballrect.left < 0 and ball.speed[0] < 0) or (ball.ballrect.right > width and ball.speed[0] > 0):
+                ball.ballrect = ball.ballrect.move(ball.speed)
+                if ball.ballrect.left < 0 or ball.ballrect.right > width:
                         ball.speed[0] = -ball.speed[0]
-                if (ball.ballrect.top < 0 and ball.speed[1] < 0) or (ball.ballrect.bottom > height-40 and ball.speed[1] > 0):
+                if ball.ballrect.top < 0 or ball.ballrect.bottom > height-20:
                         ball.speed[1] = -ball.speed[1]
 
                 screen.blit(ball.ballimage, ball.ballrect) # Combine Ball surface with workspace surface
@@ -80,8 +80,7 @@ def update_location(ballList):
                 ballList[1].speed=b1v
 
 start = False
-pause = False
-speed = 0.01
+
 while (gpio.input(27)): 
 
 	screen.fill(black)	
@@ -90,32 +89,17 @@ while (gpio.input(27)):
 
 			pos = pygame.mouse.get_pos()
 			print("Hit at " + str(pos))
-			if (start):
-				if (playMenu[0].collide(pos)):
-					start = False
-				if (playMenu[1].collide(pos)):
-					pause = not pause
-				if (playMenu[2].collide(pos)):
-					speed = speed/1.5
-					if (speed < 0.003):
-						speed = 0.003
-				if (playMenu[3].collide(pos)):
-					speed = speed*1.5
-			else:
-				if (mainMenu[0].collide(pos)):
-					print("Quitting...")
-					pygame.quit() 
-					sys.exit(1)
+			if (buttons[0].collide(pos)):
+				print("Quitting...")
+				pygame.quit() 
+				sys.exit(1)
 
-				if (mainMenu[1].collide(pos)):
-					start = True
+			if (buttons[1].collide(pos)):
+				start = True
 
+	drawMenu()
 	if (start):
-		drawMenu(playMenu)
 		update_location(ballList)
-	else:
-		drawMenu(mainMenu)
-
 	pygame.display.flip()
-	time.sleep(speed)
+	time.sleep(0.01)
 	
