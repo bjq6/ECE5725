@@ -75,13 +75,13 @@ gpio.add_event_detect(p_BTN1, gpio.FALLING, callback=btn1_cb, bouncetime=200)
 gpio.add_event_detect(p_BTN2, gpio.FALLING, callback=btn2_cb, bouncetime=200)
 
 
-os.putenv('SDL_VIDEODRIVER', 'fbcon') # Display on piTFT
-os.putenv('SDL_FBDEV', '/dev/fb1')
-os.putenv('SDL_MOUSEDRV', 'TSLIB') # Track mouse clicks on piTFT
-os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
+#os.putenv('SDL_VIDEODRIVER', 'fbcon') # Display on piTFT
+#os.putenv('SDL_FBDEV', '/dev/fb1')
+#os.putenv('SDL_MOUSEDRV', 'TSLIB') # Track mouse clicks on piTFT
+#os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
 
 pygame.init()
-pygame.mouse.set_visible(False)
+#pygame.mouse.set_visible(False)
 
 size = width, height = 320, 240
 black = 0, 0, 0

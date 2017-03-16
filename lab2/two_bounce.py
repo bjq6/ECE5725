@@ -39,7 +39,7 @@ def update_location(ballList):
 
 while (gpio.input(27)): 
 	for e in pygame.event.get():
-		if (e.type == QUIT):
+		if (e.type == pygame.QUIT):
 			pygame.quit()
 			sys.exit()	
 

@@ -8,10 +8,10 @@ import sys
 gpio.setmode(gpio.BCM)
 gpio.setup(27, gpio.IN, pull_up_down=gpio.PUD_UP)
 
-os.putenv('SDL_VIDEODRIVER', 'fbcon') # Display on piTFT
-os.putenv('SDL_FBDEV', '/dev/fb1')
-os.putenv('SDL_MOUSEDRV', 'TSLIB') # Track mouse clicks on piTFT
-os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
+#os.putenv('SDL_VIDEODRIVER', 'fbcon') # Display on piTFT
+#os.putenv('SDL_FBDEV', '/dev/fb1')
+#os.putenv('SDL_MOUSEDRV', 'TSLIB') # Track mouse clicks on piTFT
+#os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
 
 pygame.init()
 pygame.mouse.set_visible(False)
