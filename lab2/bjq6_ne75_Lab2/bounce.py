@@ -1,3 +1,9 @@
+# ----------------
+# bounce.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Feb 20, 2017
+# ----------------
+
 import pygame # Import Library and initialize pygame
 import RPi.GPIO as gpio
 from threading import Thread

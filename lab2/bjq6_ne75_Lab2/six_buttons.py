@@ -1,3 +1,9 @@
+# ----------------
+# six_buttons.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Feb 20, 2017
+# ----------------
+
 import RPi.GPIO as gpio
 import sys
 
