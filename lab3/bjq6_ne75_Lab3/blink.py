@@ -1,3 +1,10 @@
+# ----------------
+# blink.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Mar 6, 2017
+# ----------------
+
+
 import RPi.GPIO as gpio
 import time
 

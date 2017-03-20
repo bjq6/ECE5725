@@ -1,3 +1,9 @@
+# ----------------
+# rolling_control.py
+# Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+# Mar 6, 2017
+# ----------------
+
 import pygame # Import Library and initialize pygame
 import RPi.GPIO as gpio
 import os
