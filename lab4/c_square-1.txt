@@ -1,0 +1,26 @@
+(50 KHz)
+
+ Performance counter stats for './blink_v1':
+
+      30062.472590      task-clock (msec)         #    1.000 CPUs utilized
+               303      context-switches          #    0.010 K/sec
+                 0      cpu-migrations            #    0.000 K/sec
+                76      page-faults               #    0.003 K/sec
+    36,074,538,585      cycles                    #    1.200 GHz
+    19,224,983,965      instructions              #    0.53  insns per cycle
+
+      30.069657004 seconds time elapsed
+
+
+(500 Hz)
+
+ Performance counter stats for './blink_v1':
+
+        247.269063      task-clock (msec)         #    0.008 CPUs utilized
+            30,000      context-switches          #    0.121 M/sec
+                 2      cpu-migrations            #    0.008 K/sec
+                75      page-faults               #    0.303 K/sec
+       262,816,490      cycles                    #    1.063 GHz
+       149,797,929      instructions              #    0.57  insns per cycle
+
+      31.907283536 seconds time elapsed
