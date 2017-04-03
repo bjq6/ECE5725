@@ -520,10 +520,34 @@
 	"buffers":
 	[
 		{
-			"file": "Makefile",
+			"contents": "/*\n\n    Part of the Raspberry-Pi Bare Metal Tutorials\n    Copyright (c) 2013, Brian Sidebotham\n    All rights reserved.\n\n    Redistribution and use in source and binary forms, with or without\n    modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice,\n        this list of conditions and the following disclaimer.\n\n    2. Redistributions in binary form must reproduce the above copyright notice,\n        this list of conditions and the following disclaimer in the\n        documentation and/or other materials provided with the distribution.\n\n    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\n    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\n    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\n    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\n    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\n    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\n    POSSIBILITY OF SUCH DAMAGE.\n\n*/\n\n#include <string.h>\n#include <stdlib.h>\n\n#include \"rpi-gpio.h\"\n#include \"rpi-armtimer.h\"\n#include \"rpi-systimer.h\"\n#include \"rpi-interrupts.h\"\n\n/** Main function - we'll never return from here */\nvoid kernel_main(unsigned int r0, unsigned int r1, unsigned int atags) {\n    /* Write 1 to the LED init nibble in the Function Select GPIO\n       peripheral register to enable LED pin as an output */\n    RPI_GetGpio()->LED_GPFSEL |= LED_GPFBIT;\n\n    /* Enable the timer interrupt IRQ */\n    RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;\n\n    /* Setup the system timer interrupt */\n    /* Timer frequency = Clk/256 * 0x400 */\n    RPI_GetArmTimer()->Load = 0x400;\n\n    /* Setup the ARM Timer */\n    RPI_GetArmTimer()->Control =\n            RPI_ARMTIMER_CTRL_23BIT |\n            RPI_ARMTIMER_CTRL_ENABLE |\n            RPI_ARMTIMER_CTRL_INT_ENABLE |\n            RPI_ARMTIMER_CTRL_PRESCALE_256;\n\n    /* Enable interrupts! */\n    _enable_interrupts();\n\n    /* Never exit as there is no OS to exit to! */\n    while(1)\n    {\n\n    }\n}\n",
+			"file": "main.c",
+			"file_size": 2491,
+			"file_write_time": 131356535240000000,
 			"settings":
 			{
-				"buffer_size": 1823,
+				"buffer_size": 2491,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rpi-interrupts.c",
+			"settings":
+			{
+				"buffer_size": 413,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "\n//  Part of the Raspberry-Pi Bare Metal Tutorials\n//  Copyright (c) 2013, Brian Sidebotham\n//  All rights reserved.\n//\n//  Redistribution and use in source and binary forms, with or without\n//  modification, are permitted provided that the following conditions are met:\n//\n//  1. Redistributions of source code must retain the above copyright notice,\n//      this list of conditions and the following disclaimer.\n//\n//  2. Redistributions in binary form must reproduce the above copyright notice,\n//      this list of conditions and the following disclaimer in the\n//      documentation and/or other materials provided with the distribution.\n//\n//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n//  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n//  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n//  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\n//  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\n//  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\n//  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\n//  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\n//  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n//  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\n//  POSSIBILITY OF SUCH DAMAGE.\n\n\n.section \".text.startup\"\n\n.global _start\n.global _get_stack_pointer\n.global _exception_table\n.global _enable_interrupts\n\n// From the ARM ARM (Architecture Reference Manual). Make sure you get the\n// ARMv5 documentation which includes the ARMv6 documentation which is the\n// correct processor type for the Broadcom BCM2835. The ARMv6-M manuals\n// available on the ARM website are for Cortex-M parts only and are very\n// different.\n//\n// See ARM section A2.2 (Processor Modes)\n\n.equ    CPSR_MODE_USER,         0x10\n.equ    CPSR_MODE_FIQ,          0x11\n.equ    CPSR_MODE_IRQ,          0x12\n.equ    CPSR_MODE_SVR,          0x13\n.equ    CPSR_MODE_ABORT,        0x17\n.equ    CPSR_MODE_UNDEFINED,    0x1B\n.equ    CPSR_MODE_SYSTEM,       0x1F\n\n// See ARM section A2.5 (Program status registers)\n.equ    CPSR_IRQ_INHIBIT,       0x80\n.equ    CPSR_FIQ_INHIBIT,       0x40\n.equ    CPSR_THUMB,             0x20\n\n_start:\n    ldr pc, _reset_h\n    ldr pc, _undefined_instruction_vector_h\n    ldr pc, _software_interrupt_vector_h\n    ldr pc, _prefetch_abort_vector_h\n    ldr pc, _data_abort_vector_h\n    ldr pc, _unused_handler_h\n    ldr pc, _interrupt_vector_h\n    ldr pc, _fast_interrupt_vector_h\n\n_reset_h:                           .word   _reset_\n_undefined_instruction_vector_h:    .word   undefined_instruction_vector\n_software_interrupt_vector_h:       .word   software_interrupt_vector\n_prefetch_abort_vector_h:           .word   prefetch_abort_vector\n_data_abort_vector_h:               .word   data_abort_vector\n_unused_handler_h:                  .word   _reset_\n_interrupt_vector_h:                .word   interrupt_vector\n_fast_interrupt_vector_h:           .word   fast_interrupt_vector\n\n_reset_:\n    // We enter execution in supervisor mode. For more information on\n    // processor modes see ARM Section A2.2 (Processor Modes)\n\n    mov     r0, #0x8000\n    mov     r1, #0x0000\n    ldmia   r0!,{r2, r3, r4, r5, r6, r7, r8, r9}\n    stmia   r1!,{r2, r3, r4, r5, r6, r7, r8, r9}\n    ldmia   r0!,{r2, r3, r4, r5, r6, r7, r8, r9}\n    stmia   r1!,{r2, r3, r4, r5, r6, r7, r8, r9}\n\n    // We're going to use interrupt mode, so setup the interrupt mode\n    // stack pointer which differs to the application stack pointer:\n    // mov r0, #(CPSR_MODE_IRQ | CPSR_IRQ_INHIBIT | CPSR_FIQ_INHIBIT )\n    mov r0, #0xD2\n    msr cpsr_c, r0\n    mov sp, #(63 * 1024 * 1024)\n\n    // Switch back to supervisor mode (our application mode) and\n    // set the stack pointer towards the end of RAM. Remember that the\n    // stack works its way down memory, our heap will work it's way\n    // up memory toward the application stack.\n    // mov r0, #(CPSR_MODE_SVR | CPSR_IRQ_INHIBIT | CPSR_FIQ_INHIBIT )\n    mov r0, #0xD3\n    msr cpsr_c, r0\n\n    // Set the stack pointer at some point in RAM that won't harm us\n    // It's different from the IRQ stack pointer above and no matter\n    // what the GPU/CPU memory split, 64MB is available to the CPU\n    // Keep it within the limits and also keep it aligned to a 32-bit\n    // boundary!\n    mov     sp, #(64 * 1024 * 1024)\n\n    // The c-startup function which we never return from. This function will\n    // initialise the ro data section (most things that have the const\n    // declaration) and initialise the bss section variables to 0 (generally\n    // known as automatics). It'll then call main, which should never return.\n    bl      _cstartup\n\n    // If main does return for some reason, just catch it and stay here.\n_inf_loop:\n    b       _inf_loop\n\n\n_get_stack_pointer:\n    // Return the stack pointer value\n    str     sp, [sp]\n    ldr     r0, [sp]\n\n    // Return from the function\n    mov     pc, lr\n\n\n_enable_interrupts:\n    mrs     r0, cpsr\n    bic     r0, r0, #0x80\n    msr     cpsr_c, r0\n\n    mov     pc, lr\n",
+			"file": "start.S",
+			"file_size": 5188,
+			"file_write_time": 131356540570000000,
+			"settings":
+			{
+				"buffer_size": 5188,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		}
@@ -739,6 +763,10 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/Users/Nikita/Github/ECE5725/final_project/rpi_test_project"
+	],
 	"file_history":
 	[
 		"/Users/Nikita/Github/ECE5725/final_project/rpi_test_project/rpi_test_project.sublime-project",
@@ -798,7 +826,7 @@
 	],
 	"find":
 	{
-		"height": 27.0
+		"height": 25.0
 	},
 	"find_in_files":
 	{
@@ -957,35 +985,97 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Makefile",
+					"file": "main.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1823,
+						"buffer_size": 2491,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1465,
+								1465
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
+							"syntax": "Packages/User/Stino/Arduino.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "rpi-interrupts.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 413,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								413,
+								413
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/User/Stino/Arduino.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 859.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "start.S",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5188,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4140,
+								4140
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 684.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -993,7 +1083,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 27.0
+		"height": 25.0
 	},
 	"input":
 	{
@@ -1034,7 +1124,7 @@
 	"project": "rpi_test_project.sublime-project",
 	"replace":
 	{
-		"height": 50.0
+		"height": 46.0
 	},
 	"save_all_on_build": true,
 	"select_file":

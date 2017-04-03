@@ -33,7 +33,7 @@ Disassembly of section .text:
     8034:	00008050 	andeq	r8, r0, r0, asr r0
 
 00008038 <irq_handler>:
-    8038:	00008078 	andeq	r8, r0, r8, ror r0
+    8038:	00008088 	andeq	r8, r0, r8, lsl #1
 
 0000803c <fiq_handler>:
     803c:	00008050 	andeq	r8, r0, r0, asr r0
@@ -42,7 +42,7 @@ Disassembly of section .text:
     8040:	e3a00902 	mov	r0, #32768	; 0x8000
     8044:	ee8c0f10 	mcr	15, 4, r0, cr12, cr0, {0}
     8048:	e3a0d902 	mov	sp, #32768	; 0x8000
-    804c:	eb00002c 	bl	8104 <notmain>
+    804c:	eb00002a 	bl	80fc <kernel_main>
 
 00008050 <hang>:
     8050:	eafffffe 	b	8050 <hang>
@@ -58,135 +58,146 @@ Disassembly of section .text:
 00008064 <dummy>:
     8064:	e12fff1e 	bx	lr
 
-00008068 <enable_irq>:
+00008068 <_enable_irq>:
     8068:	e10f0000 	mrs	r0, CPSR
     806c:	e3c00080 	bic	r0, r0, #128	; 0x80
     8070:	e121f000 	msr	CPSR_c, r0
     8074:	e12fff1e 	bx	lr
 
-00008078 <irq>:
-    8078:	e92d5fff 	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, lr}
-    807c:	eb000001 	bl	8088 <c_irq_handler>
-    8080:	e8bd5fff 	pop	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, lr}
-    8084:	e160006e 	eret
+00008078 <_disable_irq>:
+    8078:	e10f0000 	mrs	r0, CPSR
+    807c:	e3800080 	orr	r0, r0, #128	; 0x80
+    8080:	e121f000 	msr	CPSR_c, r0
+    8084:	e12fff1e 	bx	lr
 
-00008088 <c_irq_handler>:
-    8088:	e308323c 	movw	r3, #33340	; 0x823c
-    808c:	e3403000 	movt	r3, #0
-    8090:	e92d4010 	push	{r4, lr}
-    8094:	e5932000 	ldr	r2, [r3]
-    8098:	e2822001 	add	r2, r2, #1
-    809c:	e5832000 	str	r2, [r3]
-    80a0:	e5933000 	ldr	r3, [r3]
-    80a4:	e3130001 	tst	r3, #1
-    80a8:	1a00000c 	bne	80e0 <c_irq_handler+0x58>
-    80ac:	e3a0002c 	mov	r0, #44	; 0x2c
-    80b0:	e3a01008 	mov	r1, #8
-    80b4:	e3430f20 	movt	r0, #16160	; 0x3f20
-    80b8:	ebffffe5 	bl	8054 <PUT32>
-    80bc:	e3a0002c 	mov	r0, #44	; 0x2c
-    80c0:	e3a01902 	mov	r1, #32768	; 0x8000
-    80c4:	e3430f20 	movt	r0, #16160	; 0x3f20
-    80c8:	ebffffe1 	bl	8054 <PUT32>
-    80cc:	e30b040c 	movw	r0, #46092	; 0xb40c
-    80d0:	e3a01000 	mov	r1, #0
-    80d4:	e3430f00 	movt	r0, #16128	; 0x3f00
-    80d8:	e8bd4010 	pop	{r4, lr}
-    80dc:	eaffffdc 	b	8054 <PUT32>
-    80e0:	e3a00020 	mov	r0, #32
-    80e4:	e3a01902 	mov	r1, #32768	; 0x8000
-    80e8:	e3430f20 	movt	r0, #16160	; 0x3f20
-    80ec:	ebffffd8 	bl	8054 <PUT32>
-    80f0:	e3a00020 	mov	r0, #32
-    80f4:	e3a01008 	mov	r1, #8
-    80f8:	e3430f20 	movt	r0, #16160	; 0x3f20
-    80fc:	ebffffd4 	bl	8054 <PUT32>
-    8100:	eafffff1 	b	80cc <c_irq_handler+0x44>
+00008088 <irq>:
+    8088:	e92d5fff 	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, lr}
+    808c:	eb000001 	bl	8098 <c_irq_handler>
+    8090:	e8bd5fff 	pop	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, lr}
+    8094:	e160006e 	eret
 
-00008104 <notmain>:
-    8104:	e30b0224 	movw	r0, #45604	; 0xb224
-    8108:	e3a01001 	mov	r1, #1
-    810c:	e92d4010 	push	{r4, lr}
-    8110:	e3430f00 	movt	r0, #16128	; 0x3f00
-    8114:	ebffffce 	bl	8054 <PUT32>
-    8118:	e3a00010 	mov	r0, #16
-    811c:	e3430f20 	movt	r0, #16160	; 0x3f20
-    8120:	ebffffcd 	bl	805c <GET32>
-    8124:	e3c0160e 	bic	r1, r0, #14680064	; 0xe00000
-    8128:	e3a00010 	mov	r0, #16
-    812c:	e3811602 	orr	r1, r1, #2097152	; 0x200000
-    8130:	e3430f20 	movt	r0, #16160	; 0x3f20
-    8134:	ebffffc6 	bl	8054 <PUT32>
-    8138:	e3a00020 	mov	r0, #32
-    813c:	e3a01902 	mov	r1, #32768	; 0x8000
-    8140:	e3430f20 	movt	r0, #16160	; 0x3f20
-    8144:	ebffffc2 	bl	8054 <PUT32>
-    8148:	e30b0408 	movw	r0, #46088	; 0xb408
-    814c:	e3a0183e 	mov	r1, #4063232	; 0x3e0000
-    8150:	e3430f00 	movt	r0, #16128	; 0x3f00
-    8154:	ebffffbe 	bl	8054 <PUT32>
-    8158:	e304123f 	movw	r1, #16959	; 0x423f
-    815c:	e3a00b2d 	mov	r0, #46080	; 0xb400
-    8160:	e340100f 	movt	r1, #15
-    8164:	e3430f00 	movt	r0, #16128	; 0x3f00
-    8168:	ebffffb9 	bl	8054 <PUT32>
-    816c:	e304123f 	movw	r1, #16959	; 0x423f
-    8170:	e30b0418 	movw	r0, #46104	; 0xb418
-    8174:	e340100f 	movt	r1, #15
-    8178:	e3430f00 	movt	r0, #16128	; 0x3f00
-    817c:	ebffffb4 	bl	8054 <PUT32>
-    8180:	e30b041c 	movw	r0, #46108	; 0xb41c
-    8184:	e3a010f9 	mov	r1, #249	; 0xf9
-    8188:	e3430f00 	movt	r0, #16128	; 0x3f00
-    818c:	ebffffb0 	bl	8054 <PUT32>
-    8190:	e30b040c 	movw	r0, #46092	; 0xb40c
-    8194:	e3a01000 	mov	r1, #0
-    8198:	e3430f00 	movt	r0, #16128	; 0x3f00
-    819c:	ebffffac 	bl	8054 <PUT32>
-    81a0:	e3a010a2 	mov	r1, #162	; 0xa2
-    81a4:	e30b0408 	movw	r0, #46088	; 0xb408
-    81a8:	e340103e 	movt	r1, #62	; 0x3e
-    81ac:	e3430f00 	movt	r0, #16128	; 0x3f00
-    81b0:	ebffffa7 	bl	8054 <PUT32>
-    81b4:	e308147f 	movw	r1, #33919	; 0x847f
-    81b8:	e3a00b2d 	mov	r0, #46080	; 0xb400
-    81bc:	e340101e 	movt	r1, #30
-    81c0:	e3430f00 	movt	r0, #16128	; 0x3f00
-    81c4:	ebffffa2 	bl	8054 <PUT32>
-    81c8:	e308147f 	movw	r1, #33919	; 0x847f
-    81cc:	e30b0418 	movw	r0, #46104	; 0xb418
-    81d0:	e340101e 	movt	r1, #30
-    81d4:	e3430f00 	movt	r0, #16128	; 0x3f00
-    81d8:	ebffff9d 	bl	8054 <PUT32>
-    81dc:	e30b040c 	movw	r0, #46092	; 0xb40c
-    81e0:	e3a01000 	mov	r1, #0
-    81e4:	e3430f00 	movt	r0, #16128	; 0x3f00
-    81e8:	ebffff99 	bl	8054 <PUT32>
-    81ec:	e30b0218 	movw	r0, #45592	; 0xb218
-    81f0:	e3a01001 	mov	r1, #1
-    81f4:	e3430f00 	movt	r0, #16128	; 0x3f00
-    81f8:	ebffff95 	bl	8054 <PUT32>
-    81fc:	e304123f 	movw	r1, #16959	; 0x423f
-    8200:	e3a00b2d 	mov	r0, #46080	; 0xb400
-    8204:	e340100f 	movt	r1, #15
-    8208:	e3430f00 	movt	r0, #16128	; 0x3f00
-    820c:	ebffff90 	bl	8054 <PUT32>
-    8210:	e304123f 	movw	r1, #16959	; 0x423f
-    8214:	e30b0418 	movw	r0, #46104	; 0xb418
-    8218:	e340100f 	movt	r1, #15
-    821c:	e3430f00 	movt	r0, #16128	; 0x3f00
-    8220:	ebffff8b 	bl	8054 <PUT32>
-    8224:	e308323c 	movw	r3, #33340	; 0x823c
-    8228:	e3a02000 	mov	r2, #0
-    822c:	e3403000 	movt	r3, #0
-    8230:	e5832000 	str	r2, [r3]
-    8234:	ebffff8b 	bl	8068 <enable_irq>
-    8238:	eafffffe 	b	8238 <notmain+0x134>
+00008098 <c_irq_handler>:
+    8098:	e92d4010 	push	{r4, lr}
+    809c:	eb000056 	bl	81fc <_get_arm_timer>
+    80a0:	e5903014 	ldr	r3, [r0, #20]
+    80a4:	e3530001 	cmp	r3, #1
+    80a8:	0a000003 	beq	80bc <c_irq_handler+0x24>
+    80ac:	eb000052 	bl	81fc <_get_arm_timer>
+    80b0:	e3a03001 	mov	r3, #1
+    80b4:	e580300c 	str	r3, [r0, #12]
+    80b8:	e8bd8010 	pop	{r4, pc}
+    80bc:	e3082218 	movw	r2, #33304	; 0x8218
+    80c0:	e3402000 	movt	r2, #0
+    80c4:	e5921000 	ldr	r1, [r2]
+    80c8:	e3510000 	cmp	r1, #0
+    80cc:	1a000004 	bne	80e4 <c_irq_handler+0x4c>
+    80d0:	e5823000 	str	r3, [r2]
+    80d4:	eb000044 	bl	81ec <_get_gpio_reg>
+    80d8:	e3a03008 	mov	r3, #8
+    80dc:	e580302c 	str	r3, [r0, #44]	; 0x2c
+    80e0:	eafffff1 	b	80ac <c_irq_handler+0x14>
+    80e4:	e3a03000 	mov	r3, #0
+    80e8:	e5823000 	str	r3, [r2]
+    80ec:	eb00003e 	bl	81ec <_get_gpio_reg>
+    80f0:	e3a03008 	mov	r3, #8
+    80f4:	e5803020 	str	r3, [r0, #32]
+    80f8:	eaffffeb 	b	80ac <c_irq_handler+0x14>
+
+000080fc <kernel_main>:
+    80fc:	e92d4070 	push	{r4, r5, r6, lr}
+    8100:	ebffffdc 	bl	8078 <_disable_irq>
+    8104:	eb000038 	bl	81ec <_get_gpio_reg>
+    8108:	e1a04000 	mov	r4, r0
+    810c:	eb00003a 	bl	81fc <_get_arm_timer>
+    8110:	e1a05000 	mov	r5, r0
+    8114:	eb00003b 	bl	8208 <_get_irq_controller>
+    8118:	e594300c 	ldr	r3, [r4, #12]
+    811c:	e3041240 	movw	r1, #16960	; 0x4240
+    8120:	e5942010 	ldr	r2, [r4, #16]
+    8124:	e340100f 	movt	r1, #15
+    8128:	e3833902 	orr	r3, r3, #32768	; 0x8000
+    812c:	e3a0c0a2 	mov	ip, #162	; 0xa2
+    8130:	e584300c 	str	r3, [r4, #12]
+    8134:	e3822602 	orr	r2, r2, #2097152	; 0x200000
+    8138:	e5842010 	str	r2, [r4, #16]
+    813c:	e3a03001 	mov	r3, #1
+    8140:	e5851000 	str	r1, [r5]
+    8144:	e3a04902 	mov	r4, #32768	; 0x8000
+    8148:	e585c008 	str	ip, [r5, #8]
+    814c:	e5803018 	str	r3, [r0, #24]
+    8150:	ebffffc4 	bl	8068 <_enable_irq>
+    8154:	eb000024 	bl	81ec <_get_gpio_reg>
+    8158:	e580402c 	str	r4, [r0, #44]	; 0x2c
+    815c:	eb00000c 	bl	8194 <CNT32>
+    8160:	e280093d 	add	r0, r0, #999424	; 0xf4000
+    8164:	e2800d09 	add	r0, r0, #576	; 0x240
+    8168:	eb000019 	bl	81d4 <waitcnt32>
+    816c:	eb00001e 	bl	81ec <_get_gpio_reg>
+    8170:	e5804020 	str	r4, [r0, #32]
+    8174:	eb000006 	bl	8194 <CNT32>
+    8178:	e280093d 	add	r0, r0, #999424	; 0xf4000
+    817c:	e2800d09 	add	r0, r0, #576	; 0x240
+    8180:	eb000013 	bl	81d4 <waitcnt32>
+    8184:	eafffff2 	b	8154 <kernel_main+0x58>
+
+00008188 <_get_sys_timer>:
+    8188:	e3a00a03 	mov	r0, #12288	; 0x3000
+    818c:	e3430f00 	movt	r0, #16128	; 0x3f00
+    8190:	e12fff1e 	bx	lr
+
+00008194 <CNT32>:
+    8194:	e3a03a03 	mov	r3, #12288	; 0x3000
+    8198:	e3433f00 	movt	r3, #16128	; 0x3f00
+    819c:	e5930004 	ldr	r0, [r3, #4]
+    81a0:	e12fff1e 	bx	lr
+
+000081a4 <CNT64>:
+    81a4:	e3a01a03 	mov	r1, #12288	; 0x3000
+    81a8:	e3a02000 	mov	r2, #0
+    81ac:	e3431f00 	movt	r1, #16128	; 0x3f00
+    81b0:	e92d0030 	push	{r4, r5}
+    81b4:	e5910004 	ldr	r0, [r1, #4]
+    81b8:	e5911008 	ldr	r1, [r1, #8]
+    81bc:	e0924000 	adds	r4, r2, r0
+    81c0:	e2a15000 	adc	r5, r1, #0
+    81c4:	e1a00004 	mov	r0, r4
+    81c8:	e1a01005 	mov	r1, r5
+    81cc:	e8bd0030 	pop	{r4, r5}
+    81d0:	e12fff1e 	bx	lr
+
+000081d4 <waitcnt32>:
+    81d4:	e3a02a03 	mov	r2, #12288	; 0x3000
+    81d8:	e3432f00 	movt	r2, #16128	; 0x3f00
+    81dc:	e5923004 	ldr	r3, [r2, #4]
+    81e0:	e1530000 	cmp	r3, r0
+    81e4:	3afffffc 	bcc	81dc <waitcnt32+0x8>
+    81e8:	e12fff1e 	bx	lr
+
+000081ec <_get_gpio_reg>:
+    81ec:	e3083214 	movw	r3, #33300	; 0x8214
+    81f0:	e3403000 	movt	r3, #0
+    81f4:	e5930000 	ldr	r0, [r3]
+    81f8:	e12fff1e 	bx	lr
+
+000081fc <_get_arm_timer>:
+    81fc:	e3a00b2d 	mov	r0, #46080	; 0xb400
+    8200:	e3430f00 	movt	r0, #16128	; 0x3f00
+    8204:	e12fff1e 	bx	lr
+
+00008208 <_get_irq_controller>:
+    8208:	e3a00cb2 	mov	r0, #45568	; 0xb200
+    820c:	e3430f00 	movt	r0, #16128	; 0x3f00
+    8210:	e12fff1e 	bx	lr
+
+Disassembly of section .data:
+
+00008214 <gpio>:
+    8214:	3f200000 	svccc	0x00200000
 
 Disassembly of section .bss:
 
-0000823c <icount>:
-    823c:	00000000 	andeq	r0, r0, r0
+00008218 <on.3772>:
+    8218:	00000000 	andeq	r0, r0, r0
 
 Disassembly of section .ARM.attributes:
 
@@ -207,7 +218,7 @@ Disassembly of section .ARM.attributes:
 Disassembly of section .comment:
 
 00000000 <.comment>:
-   0:	3a434347 	bcc	10d0d24 <icount+0x10c8ae8>
+   0:	3a434347 	bcc	10d0d24 <on.3772+0x10c8b0c>
    4:	4e472820 	cdpmi	8, 4, cr2, cr7, cr0, {1}
    8:	6f542055 	svcvs	0x00542055
    c:	20736c6f 	rsbscs	r6, r3, pc, ror #24
@@ -225,7 +236,7 @@ Disassembly of section .comment:
   3c:	6c657228 	sfmvs	f7, 2, [r5], #-160	; 0xffffff60
   40:	65736165 	ldrbvs	r6, [r3, #-357]!	; 0xfffffe9b
   44:	415b2029 	cmpmi	fp, r9, lsr #32
-  48:	652f4d52 	strvs	r4, [pc, #-3410]!	; fffff2fe <icount+0xffff70c2>
+  48:	652f4d52 	strvs	r4, [pc, #-3410]!	; fffff2fe <on.3772+0xffff70e6>
   4c:	6465626d 	strbtvs	r6, [r5], #-621	; 0xfffffd93
   50:	2d646564 	cfstr64cs	mvdx6, [r4, #-400]!	; 0xfffffe70
   54:	72622d35 	rsbvc	r2, r2, #3392	; 0xd40

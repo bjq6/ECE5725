@@ -26,7 +26,8 @@ reset:
     MCR p15, 4, r0, c12, c0, 0
 
     mov sp,#0x8000
-    bl notmain
+    bl kernel_main
+    
 hang: b hang
 
 .globl PUT32
@@ -43,10 +44,17 @@ GET32:
 dummy:
     bx lr
 
-.globl enable_irq
-enable_irq:
+.globl _enable_irq
+_enable_irq:
     mrs r0,cpsr
     bic r0,r0,#0x80
+    msr cpsr_c,r0
+    bx lr
+
+.globl _disable_irq
+_disable_irq:
+    mrs r0,cpsr
+    orr r0,r0,#0x80
     msr cpsr_c,r0
     bx lr
 
