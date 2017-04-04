@@ -21,7 +21,6 @@ The rest must be done manually. All registers are defined though
 
 Other registers hold info on pull up/down info, edge detection, value detection, etc. 
 
-
 ******************************/
 
 /* The base address of the GPIO peripheral (ARM Physical Address) */
@@ -73,8 +72,8 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define ACT_LED_GPSET       GPIO_GPSET1
 #define ACT_LED_GPCLR       GPIO_GPCLR1
 #define ACT_LED_GPIO_BIT    GPIO47
-#define ACT_LED_ON()        do { _get_gpio_reg()[ACT_LED_GPCLR] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
-#define ACT_LED_OFF()       do { _get_gpio_reg()[ACT_LED_GPSET] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
+#define ACT_LED_OFF()       do { _get_gpio_reg()[ACT_LED_GPCLR] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
+#define ACT_LED_ON()       	do { _get_gpio_reg()[ACT_LED_GPSET] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
 
 #define PWR_LED_GPFSEL      GPIO_GPFSEL3
 #define PWR_LED_GPFBIT      GPIO35_FBIT
@@ -83,6 +82,9 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define PWR_LED_GPIO_BIT    GPIO35
 #define PWR_LED_ON()        do { _get_gpio_reg()[PWR_LED_GPCLR] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
 #define PWR_LED_OFF()       do { _get_gpio_reg()[PWR_LED_GPSET] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
+
+#define GPIO_PDOWN 		1
+#define GPIO_PUP 		2
 
 //Bank 0
 #define GPIO0_FSEL		GPIO_GPFSEL0	
@@ -308,5 +310,6 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define GPIO53 			21
 
 uint32_t *_get_gpio_reg();
+void _set_gpio_pull(uint8_t pin, uint8_t dir);
 
 #endif
