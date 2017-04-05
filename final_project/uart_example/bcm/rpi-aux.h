@@ -31,6 +31,8 @@
 #ifndef RPI_AUX_H
 #define RPI_AUX_H
 
+#include <stdint.h>
+
 #include "rpi-base.h"
 
 /* Although these values were originally from the BCM2835 Arm peripherals PDF
@@ -83,6 +85,8 @@
 #define AUX_MUSTAT_RX_FIFO_LEVEL    ( 7 << 16 )
 #define AUX_MUSTAT_TX_FIFO_LEVEL    ( 7 << 24 )
 
+#define AUX_MU_RX_IRQ_ENABLE           5
+#define AUX_MU_RX_IRQ_DISABLE          0
 
 #define FSEL0(x)        ( x )
 #define FSEL1(x)        ( x << 3 )
@@ -180,8 +184,10 @@ typedef struct {
     volatile unsigned int SPI1_PEEK;
     } aux_t;
 
-extern aux_t* _get_aux(void);
-extern void _uart_init(int baud, int bits);
-extern void _uart_tx(void* p, char c);
+aux_t* _get_aux(void);
+void _uart_init(int baud, int bits, int irq);
+void _uart_tx(void* p, char c);
+uint8_t _uart_check();
+uint8_t _uart_rx();
 
 #endif

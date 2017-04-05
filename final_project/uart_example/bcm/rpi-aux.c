@@ -15,7 +15,7 @@ aux_t* _get_aux(void) {
    http://elinux.org/BCM2835_datasheet_errata */
 #define SYS_FREQ    250000000
 
-void _uart_init(int baud, int bits) {
+void _uart_init(int baud, int bits, int irq) {
 
     /* As this is a mini uart the configuration is complete! Now just
        enable the uart. Note from the documentation in section 2.1.1 of
@@ -26,7 +26,7 @@ void _uart_init(int baud, int bits) {
     auxillary->ENABLES = AUX_ENA_MINIUART;
 
     /* Disable interrupts for now */
-    /* auxillary->IRQ &= ~AUX_IRQ_MU; */
+    //auxillary->IRQ &= ~AUX_IRQ_MU;
 
     auxillary->MU_IER = 0;
 
@@ -42,7 +42,7 @@ void _uart_init(int baud, int bits) {
     auxillary->MU_MCR = 0;
 
     /* Disable all interrupts from MU and clear the fifos */
-    auxillary->MU_IER = 0;
+    auxillary->MU_IER = irq;
 
     auxillary->MU_IIR = 0xC6;
 
@@ -59,9 +59,10 @@ void _uart_init(int baud, int bits) {
     _get_gpio_reg()[GPIO15_FSEL] |= (FS_ALT5 << GPIO15_FBIT);
 
     _set_gpio_pull(GPIO_BANK0, GPIO14, GPIO_POFF);
+    _set_gpio_pull(GPIO_BANK0, GPIO15, GPIO_POFF);
 
     /* Disable flow control,enable transmitter and receiver! */
-    auxillary->MU_CNTL = AUX_MUCNTL_TX_ENABLE;
+    auxillary->MU_CNTL = AUX_MUCNTL_TX_ENABLE | AUX_MUCNTL_RX_ENABLE;
 }
 
 
@@ -71,4 +72,16 @@ void _uart_tx(void* p, char c) {
 
     /* Write the character to the FIFO for transmission */
     auxillary->MU_IO = c;
+}
+
+uint8_t _uart_check() {
+    return ((auxillary->MU_LSR & 1) == 1);
+}
+
+uint8_t _uart_rx() {
+    if (_uart_check()) {
+        return (auxillary->MU_IO & 0xFF);
+    } else {
+        return 0;
+    }
 }

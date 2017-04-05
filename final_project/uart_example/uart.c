@@ -11,10 +11,13 @@
 uint32_t *gpio;
 rpi_arm_timer_t *timer;
 rpi_irq_controller_t *irq_ctrl;
+aux_t *aux;
+volatile uint8_t c;
 
 IRQ() {
     static int on;
-    if (_get_arm_timer()->maskedIRQ == 1) {
+    
+    if (timer->maskedIRQ == 1) { // timer ISR
         if (on) {
             on = 0;
             PWR_LED_OFF();
@@ -22,9 +25,12 @@ IRQ() {
             on = 1;
             PWR_LED_ON();
         }
+    } else if ((aux->MU_IIR & 0x6) == 4) { // UART ISR
+        printf("%c", _uart_rx());
     }
 
-    _get_arm_timer()->IRQclear = 1;
+    timer->IRQclear = 1;
+
 }
 
 void _init() {
@@ -39,8 +45,9 @@ void _init() {
     gpio = _get_gpio_reg();
     timer = _get_arm_timer();
     irq_ctrl = _get_irq_controller();
+    aux = _get_aux();
 
-    _uart_init(115200, 8);
+    _uart_init(115200, 8, AUX_MU_RX_IRQ_ENABLE);
     init_printf(0, _uart_tx);
 
     // load the number of counts between interrupts. 
@@ -55,6 +62,7 @@ void _init() {
     
     // enable IRQ to trigger on timer
     irq_ctrl->enable_IRQ_basic |= RPI_BASIC_ARM_TIMER_IRQ;
+    irq_ctrl->enable_IRQ_1 |= (1 << 29);
 
     _enable_irq();
 
@@ -66,11 +74,5 @@ void _init() {
 int kernel_main(void) {
     _init(); 
     
-    while(1) {
-        ACT_LED_ON();
-        printf("Hello World!\n");
-        waitcnt32(CNT32() + CLKFREQ/4);
-        ACT_LED_OFF();
-        waitcnt32(CNT32() + CLKFREQ/4);
-    }
+    while(1);
 }
