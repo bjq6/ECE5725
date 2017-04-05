@@ -15,6 +15,8 @@
 
 # Examples:
 
+Each of these examples build on the previous, so the last example should contain all the features, so copy code from an earlier example into a later one to use that featuer. 
+
 1. rpi_test_project
     
 This is a simple project using the ARM timer interrupt to flash an LED. Note the LED flashing only works on RPI2, for RPI3 change to a different GPIO, on the header 
