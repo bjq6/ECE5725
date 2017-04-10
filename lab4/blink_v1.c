@@ -10,7 +10,7 @@
 #include <wiringPi.h>
 
 #define LED 27 // BCM.GPIO pin 17 = wiringPi pin 0
-#define T 99
+#define T 1
 
 int main (void) {
 	wiringPiSetup();
