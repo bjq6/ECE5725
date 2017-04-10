@@ -1,0 +1,19 @@
+done
+# started on Mon Mar 27 18:31:04 2017
+
+
+ Performance counter stats for 'sudo ./blink_rt 25000':
+
+      30489.289412      task-clock (msec)         #    0.998 CPUs utilized          
+               225      context-switches          #    0.007 K/sec                  
+                 1      cpu-migrations            #    0.000 K/sec                  
+               378      page-faults               #    0.012 K/sec                  
+    36,586,169,046      cycles                    #    1.200 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    21,412,787,564      instructions              #    0.59  insns per cycle        
+     2,433,838,878      branches                  #   79.826 M/sec                  
+       484,630,349      branch-misses             #   19.91% of all branches        
+
+      30.556591516 seconds time elapsed
+
