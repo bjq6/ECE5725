@@ -1,3 +1,11 @@
+// ================================================
+//
+// blink_rt.c
+// Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+// Mar 27, 2017
+//
+// ================================================
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

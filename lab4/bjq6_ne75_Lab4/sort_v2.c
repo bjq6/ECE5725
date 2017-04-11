@@ -1,6 +1,12 @@
 //
 //  jfs9, 10/16/16   Performance test on C array
+//  
+// Modified:
+// Nikita Ermoshkin (ne75) and Brendan Quinn (bjq6)
+// Mar 20, 2017
 //
+// ================================================
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
