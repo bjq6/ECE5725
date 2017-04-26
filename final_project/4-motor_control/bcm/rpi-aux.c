@@ -66,7 +66,7 @@ void _uart_init(int baud, int bits, int irq) {
 }
 
 
-void _uart_tx(void* p, char c) {
+void _uart_tx(char c) {
     /* Wait until the UART has an empty space in the FIFO */
     while( ( auxillary->MU_LSR & AUX_MULSR_TX_EMPTY ) == 0 ) { }
 

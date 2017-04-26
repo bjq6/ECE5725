@@ -186,7 +186,7 @@ typedef struct {
 
 aux_t* _get_aux(void);
 void _uart_init(int baud, int bits, int irq);
-void _uart_tx(void* p, char c);
+void _uart_tx(char c);
 uint8_t _uart_check();
 uint8_t _uart_rx();
 

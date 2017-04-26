@@ -2,6 +2,20 @@
 ;@-------------------------------------------------------------------------
 ;@-------------------------------------------------------------------------
 
+
+.equ    CPSR_MODE_USER,         0x10
+.equ    CPSR_MODE_FIQ,          0x11
+.equ    CPSR_MODE_IRQ,          0x12
+.equ    CPSR_MODE_SVR,          0x13
+.equ    CPSR_MODE_ABORT,        0x17
+.equ    CPSR_MODE_UNDEFINED,    0x1B
+.equ    CPSR_MODE_SYSTEM,       0x1F
+
+// See ARM section A2.5 (Program status registers)
+.equ    CPSR_IRQ_INHIBIT,       0x80
+.equ    CPSR_FIQ_INHIBIT,       0x40
+.equ    CPSR_THUMB,             0x20
+
 .globl _start
 _start:
     ldr pc,reset_handler
@@ -13,7 +27,7 @@ _start:
     ldr pc,irq_handler
     ldr pc,fiq_handler
 reset_handler:      .word reset
-undefined_handler:  .word hang
+undefined_handler:  .word alarm
 swi_handler:        .word hang
 prefetch_handler:   .word hang
 data_handler:       .word hang
@@ -22,13 +36,44 @@ irq_handler:        .word irq
 fiq_handler:        .word hang
 
 reset:
+    mov r0, #(CPSR_MODE_IRQ | CPSR_IRQ_INHIBIT | CPSR_FIQ_INHIBIT )
+    msr cpsr_c, r0
+    mov sp, #0x8000
+    mov r0, #(CPSR_MODE_SVR | CPSR_IRQ_INHIBIT | CPSR_FIQ_INHIBIT )
+    msr cpsr_c, r0
+
+    mov sp, #0x8000000
+    bl _init_core
+
+    bl kernel_main
+    
+alarm: 
+    bl c_hang
+
+hang:
+    b hang
+
+.global _init_core
+_init_core:
     mov r0,#0x8000
     MCR p15, 4, r0, c12, c0, 0
 
-    mov sp,#0x8000000
-    bl kernel_main
-    
-hang: b hang
+    mov r0, #0
+    mrc p15, 0, r0, c1, c0, 0
+    orr r0,r0,#0x1000
+    orr r0,r0,#0x800
+    ;@ orr r0,r0,#0x4
+    mcr p15, 0, r0, c1, c0, 0
+
+    MRC p15, #0, r1, c1, c0, #2
+    ORR r1, r1, #(0xf << 20)
+    MCR p15, #0, r1, c1, c0, #2
+    MOV r1, #0
+    MCR p15, #0, r1, c7, c5, #4
+    MOV r0,#0x40000000
+    FMXR FPEXC, r0
+
+    bx lr
 
 .globl PUT32
 PUT32:

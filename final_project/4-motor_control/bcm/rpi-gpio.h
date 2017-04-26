@@ -80,8 +80,8 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define PWR_LED_GPSET       GPIO_GPSET1
 #define PWR_LED_GPCLR       GPIO_GPCLR1
 #define PWR_LED_GPIO_BIT    GPIO35
-#define PWR_LED_ON()        do { _get_gpio_reg()[PWR_LED_GPCLR] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
-#define PWR_LED_OFF()       do { _get_gpio_reg()[PWR_LED_GPSET] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
+#define PWR_LED_OFF()        do { _get_gpio_reg()[PWR_LED_GPCLR] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
+#define PWR_LED_ON()       do { _get_gpio_reg()[PWR_LED_GPSET] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
 
 
 #define FS_INPUT		0

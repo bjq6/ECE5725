@@ -23,6 +23,7 @@
 #define RPI_BASIC_ACCESS_ERROR_0_IRQ    (1 << 7)
 
 #define IRQ() void c_irq_handler()
+#define HANG() void c_hang()
 
 /** @brief The interrupt controller memory mapped register set */
 typedef struct {
