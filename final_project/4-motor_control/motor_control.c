@@ -10,7 +10,11 @@ volatile rpi_arm_timer_t *timer;
 volatile rpi_irq_controller_t *irq_ctrl;
 volatile aux_t *aux;
 
-volatile mutex_t m = 0;
+
+volatile unsigned int c1_stack[1024];
+register int sp asm ("sp");
+
+int x = 0;
 
 IRQ() {
     if (timer->maskedIRQ == 1) { // timer ISR 
@@ -25,8 +29,12 @@ IRQ() {
 
 HANG() {
 
-    printf("-----HANG INTERRUPT FROM CORE %d-----\n", (int)get_core_id());
-
+    _uart_tx('-');
+    _uart_tx('e');
+    _uart_tx(48+get_core_id());
+    _uart_tx('-');
+    _uart_tx('\n');
+    
     while(1) {
         ACT_LED_ON();
         PWR_LED_OFF();
@@ -48,13 +56,12 @@ void _init() {
     aux = _get_aux();
 
     // set power and activity leds as outputs
+    gpio[ACT_LED_GPFSEL] &= ~(7 << ACT_LED_GPFBIT);
     gpio[ACT_LED_GPFSEL] |= (1 << ACT_LED_GPFBIT);
     gpio[PWR_LED_GPFSEL] &= ~(7 << PWR_LED_GPFBIT);
     gpio[PWR_LED_GPFSEL] |= (1 << PWR_LED_GPFBIT);
-    ACT_LED_ON();
 
     _uart_init(115200, 8, AUX_MU_RX_IRQ_ENABLE);
-    _unlock_pf_mutex();
 
     // load the number of counts between interrupts. 
     timer->load = SD_T_STEP;
@@ -73,38 +80,38 @@ void _init() {
 
     _enable_irq();
 
-    printf("Initialized\n");
-
-    ACT_LED_OFF();
+    printf("\n-----------------\n");
 }
 
-void main2() {
+void __attribute__ ((naked)) main2() {
+    _init_sp((unsigned int *)CORE1_STACK);
     _init_core();
+
+    //PWR_LED_ON();
+    waitcnt32(CLKFREQ*5 + CNT32());
+    printf("Starting motion controller\n");
+
+    axis_t *x = get_x_axis();
+
+    uint32_t loop_t = 0;
+    const uint32_t loop_freq = 10;
+    int i = 0;
+    while(1) {
+        loop_t = CNT32();
+        set_target(x, i++, 30/loop_freq);
+
+        waitcnt32(loop_t + CLKFREQ/loop_freq);
+    }
+}
+
+void __attribute__ ((naked)) kernel_main() {
+    _init();
 
     ACT_LED_ON();
 
-    while(1) {
-        _lock_pf_mutex();
-        printf("printing from %d\n", (int)get_core_id());
-        _unlock_pf_mutex();
-        waitcnt32(CNT32() + CLKFREQ/4);
-        ACT_LED_OFF();
-        waitcnt32(CNT32() + CLKFREQ/4);
-        ACT_LED_ON();
-    }
-}
+    start_core(main2, CORE2_ADR);
 
-void kernel_main() {
-    _init(); 
+    pin_setup();
+    sd_main();
 
-    start_stepper_driver(CORE1_ADR, CORE2_ADR);
-
-    start_core(main2, CORE1_ADR);
-
-    while(1) {
-        _lock_pf_mutex();
-        printf("printing from %d\n", (int)get_core_id());
-        _unlock_pf_mutex();
-        waitcnt32(CNT32() + CLKFREQ);
-    }
 }

@@ -20,7 +20,8 @@ extern unsigned int GET32 (unsigned int);
 extern void _enable_irq (void);
 extern void _disable_irq (void);
 
-extern void __attribute__ ((naked)) _init_core();
+extern void _init_core();
+extern void _init_sp(volatile unsigned int *);
 
 /*
  * Types 

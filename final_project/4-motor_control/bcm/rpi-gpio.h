@@ -72,16 +72,16 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define ACT_LED_GPSET       GPIO_GPSET1
 #define ACT_LED_GPCLR       GPIO_GPCLR1
 #define ACT_LED_GPIO_BIT    GPIO47
-#define ACT_LED_OFF()       do { _get_gpio_reg()[ACT_LED_GPCLR] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
-#define ACT_LED_ON()       	do { _get_gpio_reg()[ACT_LED_GPSET] = ( 1 << ACT_LED_GPIO_BIT ); } while(0)
+#define ACT_LED_OFF()       gpio[ACT_LED_GPCLR] = 1 << ACT_LED_GPIO_BIT;
+#define ACT_LED_ON()        gpio[ACT_LED_GPSET] = 1 << ACT_LED_GPIO_BIT;
 
 #define PWR_LED_GPFSEL      GPIO_GPFSEL3
 #define PWR_LED_GPFBIT      GPIO35_FBIT
 #define PWR_LED_GPSET       GPIO_GPSET1
 #define PWR_LED_GPCLR       GPIO_GPCLR1
 #define PWR_LED_GPIO_BIT    GPIO35
-#define PWR_LED_OFF()        do { _get_gpio_reg()[PWR_LED_GPCLR] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
-#define PWR_LED_ON()       do { _get_gpio_reg()[PWR_LED_GPSET] = ( 1 << PWR_LED_GPIO_BIT ); } while(0)
+#define PWR_LED_OFF()       gpio[PWR_LED_GPCLR] = 1 << PWR_LED_GPIO_BIT;
+#define PWR_LED_ON()        gpio[PWR_LED_GPSET] = 1 << PWR_LED_GPIO_BIT;
 
 
 #define FS_INPUT		0

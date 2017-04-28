@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define SD_T_STEP 			16
+#define SD_T_STEP 			64
 
 #define X_STEP_PER_REV 		1024
 #define Y_STEP_PER_REV		1024
@@ -13,9 +13,6 @@
 #define X_IN_PER_REV		1
 #define Y_IN_PER_REV		1
 #define Z_IN_PER_REV		1
-
-int32_t x_pos; 		// current motor position
-int32_t x_target;	// target position
 
 typedef struct {
 	float e; 		// error
@@ -28,15 +25,16 @@ typedef struct {
 } pid_control_t;
 
 typedef struct {
-	float a; 		// angle (absolute)
-	float v; 		// velocity
-	uint32_t raw_n; 	// raw value (pwm width in clocks)
-	uint32_t raw_d;		// raw value (denomenator)
+	float a; 		// angle (relative)
+	float a_abs;	// angle (absolute)
+	int32_t r;		// rev count;
 
 	uint8_t enc_pin;
 	uint8_t enc_fsel;
 	uint8_t enc_fbit;
 	uint8_t enc_lev;
+
+
 } encoder_t;
 
 typedef struct {
@@ -44,6 +42,7 @@ typedef struct {
 	
 	float pos;
 	float target;
+	uint32_t speed_inv;
 
 	int32_t step_pos;
 	int32_t step_target;
@@ -67,17 +66,22 @@ typedef struct {
 
 } axis_t;
 
+axis_t* get_x_axis();
+axis_t* get_y_axis();
+axis_t* get_z_axis();
+
+void set_target(axis_t *a, float t, float v_inv);
+
 void step(axis_t *a);
 void set_dir(axis_t *a, uint8_t dir);
 void run_homing(axis_t *a);
 
-void start_stepper_driver(uint32_t adr_sd, uint32_t adr_enc);
-void start_encoder_driver(uint32_t adr);
 void sd_IRQ();
 
 void pin_setup();
 
-void sd_main();
-void enc_main();
+void read_enc(axis_t *a);
 
+
+void __attribute__ ((naked)) sd_main();
 #endif
