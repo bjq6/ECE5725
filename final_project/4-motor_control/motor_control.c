@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "bcm/bcm-includes.h"
 
@@ -83,7 +84,14 @@ void _init() {
     printf("\n-----------------\n");
 }
 
-void __attribute__ ((naked)) main2() {
+void __attribute__ ((naked)) pp_main() {
+    _init_sp((unsigned int *)CORE2_STACK);
+    _init_core();
+
+    while(1);
+}
+
+void __attribute__ ((naked)) mc_main() {
     _init_sp((unsigned int *)CORE1_STACK);
     _init_core();
 
@@ -94,13 +102,19 @@ void __attribute__ ((naked)) main2() {
     axis_t *x = get_x_axis();
 
     uint32_t loop_t = 0;
-    const uint32_t loop_freq = 10;
-    int i = 0;
+
+    int32_t i = 0;
+    
     while(1) {
         loop_t = CNT32();
-        set_target(x, i++, 30/loop_freq);
+        printf("Move forward\n");
+        set_target(x, 2*M_PI*(i++), 1);
+        waitcnt32(loop_t + CLKFREQ/1000); // wait a bit for it to get moving
+        while (x->enc.a_abs - x->target > 0.01);
 
-        waitcnt32(loop_t + CLKFREQ/loop_freq);
+
+
+        waitcnt32(loop_t + CLKFREQ/2);
     }
 }
 
@@ -109,7 +123,7 @@ void __attribute__ ((naked)) kernel_main() {
 
     ACT_LED_ON();
 
-    start_core(main2, CORE2_ADR);
+    start_core(mc_main, CORE1_ADR);
 
     pin_setup();
     sd_main();

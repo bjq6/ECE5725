@@ -62,7 +62,6 @@ void sd_IRQ() {
 	x_axis.step_cntr++;
 
 	if (step_div) {
-		x_axis.motion_active = 1;
 		ACT_LED_ON();
 
 		uint32_t step_div_mag = abs(step_div);
@@ -79,7 +78,6 @@ void sd_IRQ() {
 			x_axis.step_cntr = 0;
 		}
 	} else {
-		x_axis.motion_active = 0;
 		ACT_LED_OFF();
 	}
 }
@@ -185,9 +183,7 @@ void sd_main() {
 		if (step_div > 1000 || step_div < -1000) {
 			step_div = 0;
 		}
-		
-		//printf("e = %f, i = %f, d = %f\n", x_axis.pid.e , x_axis.pid.ie , x_axis.pid.de );
-		//printf("s = %d, ", (int)step_div);
+
 		waitcnt32(loop_t + CLKFREQ/1000); //1 ms update loop
     }
 }
