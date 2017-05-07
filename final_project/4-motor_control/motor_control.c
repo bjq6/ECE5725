@@ -11,12 +11,6 @@ volatile rpi_arm_timer_t *timer;
 volatile rpi_irq_controller_t *irq_ctrl;
 volatile aux_t *aux;
 
-
-volatile unsigned int c1_stack[1024];
-register int sp asm ("sp");
-
-int x = 0;
-
 IRQ() {
     if (timer->maskedIRQ == 1) { // timer ISR 
         sd_IRQ();
@@ -96,25 +90,26 @@ void __attribute__ ((naked)) mc_main() {
     _init_core();
 
     //PWR_LED_ON();
-    waitcnt32(CLKFREQ*5 + CNT32());
+    while(get_sd_state() != SD_READY);
+
     printf("Starting motion controller\n");
 
     axis_t *x = get_x_axis();
 
-    uint32_t loop_t = 0;
+    printf("pos = %f\n", x->enc.a_abs);
 
-    int32_t i = 0;
+    //uint32_t loop_t = 0;
     
     while(1) {
-        loop_t = CNT32();
-        printf("Move forward\n");
-        set_target(x, 2*M_PI*(i++), 1);
-        waitcnt32(loop_t + CLKFREQ/1000); // wait a bit for it to get moving
-        while (x->enc.a_abs - x->target > 0.01);
+        //loop_t = CNT32();
+        printf("At %f, move forward\n", x->pos);
+        set_target(x, 50, 3);
+        waitcnt32(CNT32() + CLKFREQ*10);
+        printf("At %f, move back\n", x->pos);
+        set_target(x, 10, 3);
+        waitcnt32(CNT32() + CLKFREQ*10);
 
-
-
-        waitcnt32(loop_t + CLKFREQ/2);
+    
     }
 }
 

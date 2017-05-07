@@ -15,28 +15,34 @@ axis_t x_axis = {0};
 axis_t y_axis = {0};
 axis_t z_axis = {0};
 
+uint32_t sd_state = SD_NOTREADY;
+
 volatile unsigned int sd_stack[1024];
 volatile unsigned int enc_stack[1024];
 
 void pin_setup() {
+
+	// setup step pin
 	x_axis.step_pin = GPIO19;
 	x_axis.step_fsel = GPIO19_FSEL;
 	x_axis.step_fbit = GPIO19_FBIT;
 	x_axis.step_set = GPIO_GPSET0;
 	x_axis.step_clr	= GPIO_GPCLR0;
 
-	gpio[x_axis.enc.enc_fsel] &= ~(7 << x_axis.enc.enc_fbit);
+	gpio[x_axis.step_fsel] &= ~(7 << x_axis.enc.enc_fbit);
 	gpio[x_axis.step_fsel] |= 1 << x_axis.step_fbit;
 
+	// setup direction pin
 	x_axis.dir_pin = GPIO26;
 	x_axis.dir_fsel = GPIO26_FSEL;
 	x_axis.dir_fbit = GPIO26_FBIT;
 	x_axis.dir_set = GPIO_GPSET0;
 	x_axis.dir_clr = GPIO_GPCLR0;
 
-	gpio[x_axis.enc.enc_fsel] &= ~(7 << x_axis.enc.enc_fbit);
+	gpio[x_axis.dir_fsel] &= ~(7 << x_axis.enc.enc_fbit);
 	gpio[x_axis.dir_fsel] |= 1 << x_axis.dir_fbit;
 
+	// setup encoder pin
 	x_axis.enc.enc_pin = GPIO6;
 	x_axis.enc.enc_fsel = GPIO6_FSEL;
 	x_axis.enc.enc_fbit = GPIO6_FBIT;
@@ -44,8 +50,27 @@ void pin_setup() {
 	
 	gpio[x_axis.enc.enc_fsel] &= ~(7 << x_axis.enc.enc_fbit);
 
-	_set_gpio_pull(GPIO_BANK0, GPIO6, GPIO_PUP);
+	_set_gpio_pull(GPIO_BANK0, x_axis.enc.enc_pin, GPIO_PUP);
 
+	// setup positive limit pin
+	x_axis.plim_pin = GPIO2;
+	x_axis.plim_fsel = GPIO2_FSEL;
+	x_axis.plim_fbit = GPIO2_FBIT;
+	x_axis.plim_lev = GPIO_GPLEV0;
+	
+	gpio[x_axis.plim_fsel] &= ~(7 << x_axis.plim_fbit);
+
+	_set_gpio_pull(GPIO_BANK0, x_axis.plim_pin, GPIO_PUP);
+
+	// setup negative limit pin
+	x_axis.nlim_pin = GPIO27;
+	x_axis.nlim_fsel = GPIO27_FSEL;
+	x_axis.nlim_fbit = GPIO27_FBIT;
+	x_axis.nlim_lev = GPIO_GPLEV0;
+	
+	gpio[x_axis.nlim_fsel] &= ~(7 << x_axis.nlim_fbit);
+
+	_set_gpio_pull(GPIO_BANK0, x_axis.nlim_pin, GPIO_PUP);
 	
 }
 
@@ -100,11 +125,28 @@ void set_dir(axis_t *a, uint8_t dir) {
 }
 
 void run_homing(axis_t *a) {
+	sd_state = SD_HOMING;
+	printf("Start homing\n");
+	volatile uint32_t *lev = &(gpio[a->plim_lev]);
+	uint8_t pin = 1 << a->plim_pin;
+
+	step_div = -10;
+
+	a->enc.home_offset = 0;
+	while ((*lev & pin));
+	step_div = 0;
+ 
+	read_enc(a);
+	a->enc.home_offset = a->enc.a;
+	a->enc.r = 0;
+	a->enc.a_abs = 0;
+	read_enc(a);
+	printf("Home offset is %f\n", a->enc.home_offset);
 }
 
 
 void set_target(axis_t *a, float t, float v_inv) {
-	a->target = t;
+	a->target = 2*M_PI*t/a->mm_per_rev;
 	a->speed_inv = v_inv;
 }
 
@@ -120,10 +162,9 @@ axis_t* get_z_axis() {
 	return &z_axis;
 }
 
-
-/* 
- * Start the cores
-*/
+uint32_t get_sd_state() {
+	return sd_state;
+}
 
 void setup_vars() {
 	x_axis.pid.Kp = 1;
@@ -135,7 +176,10 @@ void setup_vars() {
 	x_axis.enc.a = 0;
 	x_axis.enc.a_abs = 0;
 	x_axis.speed_inv = 10000;
+
+	x_axis.mm_per_rev = 8.0;
 	set_dir(&x_axis, 1);
+
 }
 
 /*
@@ -148,17 +192,14 @@ void sd_main() {
 
 	setup_vars();
 
-	run_homing(&x_axis);
-
 	step_div = 0;
 	step_en = 1;
 
-	printf("Begin stepper\n");
+	run_homing(&x_axis);
+
+	sd_state = SD_READY;
 
 	uint32_t loop_t;
-	x_axis.target = 0;
-
-	x_axis.speed_inv = 10;
 
 	while(1) {
 		loop_t = CNT32();
@@ -218,11 +259,13 @@ void read_enc(axis_t *a) {
 
 	if (an > 4.5 && prev_x < 1.78) { // we overflowed, add a revolution.
 		a->enc.r -= 1;
-	} else if (an < 1.78 && prev_x > 4.5) { // we underflowed, add a revolution. 
+	} else if (an < 1.78 && prev_x > 4.5) { // we underflowed, sub a revolution. 
 		a->enc.r += 1;
 	}
 
-	a->enc.a_abs = 2*M_PI*a->enc.r + an;
+	a->enc.a_abs = 2*M_PI*a->enc.r + an - a->enc.home_offset;
 	a->enc.a_abs = (a->enc.a_abs + prev_x_abs)/2;
+
+	a->pos = a->mm_per_rev*a->enc.a_abs/(2*M_PI);
 
 }

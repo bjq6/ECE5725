@@ -14,6 +14,12 @@
 #define Y_IN_PER_REV		1
 #define Z_IN_PER_REV		1
 
+enum {
+	SD_NOTREADY = 0,
+	SD_READY,
+	SD_HOMING
+};
+
 typedef struct {
 	float e; 		// error
 	float de;		// de/dt
@@ -28,6 +34,8 @@ typedef struct {
 	float a; 		// angle (relative)
 	float a_abs;	// angle (absolute)
 	int32_t r;		// rev count;
+
+	float home_offset;
 
 	uint8_t enc_pin;
 	uint8_t enc_fsel;
@@ -44,11 +52,11 @@ typedef struct {
 	float target;
 	uint32_t speed_inv;
 
+	float mm_per_rev;
+
 	int32_t step_pos;
 	int32_t step_target;
 	int32_t step_cntr;
-
-	volatile uint8_t motion_active;
 
 	pid_control_t pid;
 
@@ -64,11 +72,27 @@ typedef struct {
 	uint8_t dir_set;
 	uint8_t dir_clr;
 
+	uint8_t plim_pin;
+	uint8_t plim_fsel;
+	uint8_t plim_fbit;
+	uint8_t plim_set;
+	uint8_t plim_clr;
+	uint8_t plim_lev;
+
+	uint8_t nlim_pin;
+	uint8_t nlim_fsel;
+	uint8_t nlim_fbit;
+	uint8_t nlim_set;
+	uint8_t nlim_clr;
+	uint8_t nlim_lev;
+
 } axis_t;
 
 axis_t* get_x_axis();
 axis_t* get_y_axis();
 axis_t* get_z_axis();
+
+uint32_t get_sd_state();
 
 void set_target(axis_t *a, float t, float v_inv);
 
