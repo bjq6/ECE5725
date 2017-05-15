@@ -5,14 +5,7 @@
 #include <stdio.h>
 
 #define SD_T_STEP 			64
-
-#define X_STEP_PER_REV 		1024
-#define Y_STEP_PER_REV		1024
-#define Z_STEP_PER_REV		1024
-
-#define X_IN_PER_REV		1
-#define Y_IN_PER_REV		1
-#define Z_IN_PER_REV		1
+#define MOTION_EPS			0.1
 
 enum {
 	SD_NOTREADY = 0,
@@ -56,6 +49,7 @@ typedef struct {
 	
 	float pos;
 	float target;
+	float target_a;
 	uint32_t speed_inv;
 	int32_t step_div;
 
@@ -90,25 +84,25 @@ typedef struct {
 
 } axis_t;
 
+// getters
 axis_t* get_x_axis();
 axis_t* get_y_axis();
 axis_t* get_z_axis();
-
 uint32_t get_sd_state();
 
-void set_target(axis_t *a, float t, float v_inv);
+uint32_t motion_active();
 
-void step(axis_t *a);
-void set_dir(axis_t *a, uint8_t dir);
-void run_homing(axis_t *a);
+// setters
+void set_target(axis_t *a, float t, float v_inv);
 
 void sd_IRQ();
 
-void pin_setup();
+void step(axis_t *a);
+void set_dir(axis_t *a, uint8_t dir);
 
 void read_enc(axis_t *a);
-
 void update_pid(axis_t *a);
+void run_homing(axis_t *a);
 
 void __attribute__ ((naked)) sd_main();
 

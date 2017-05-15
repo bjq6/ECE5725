@@ -19,9 +19,39 @@ uint32_t sd_state = SD_NOTREADY;
 volatile unsigned int sd_stack[1024];
 volatile unsigned int enc_stack[1024];
 
-void pin_setup() {
+void setup_vars();
+void setup_pins();
+uint32_t axis_active(axis_t* a);
 
+/*
+ * Main function
+ */ 
+void sd_main() {
+	setup_pins();
+	setup_vars();
 
+	PWR_LED_ON();
+	
+	irq_ctrl->enable_IRQ_basic |= RPI_BASIC_ARM_TIMER_IRQ;
+	step_en = 1;
+
+	run_homing(&x_axis);
+	run_homing(&y_axis);
+
+	sd_state = SD_READY;
+
+	uint32_t loop_t;
+
+	while(1) {
+		loop_t = CNT32();
+		update_pid(&x_axis);
+		update_pid(&y_axis);
+
+		waitcnt32(loop_t + CLKFREQ/1000); //1 ms update loop
+    }
+}
+
+void setup_pins() {
 	gpio[GPIO13_FSEL] &= ~(7 << GPIO13_FBIT);
 	gpio[GPIO13_FSEL] |= (1 << GPIO13_FBIT);
 	gpio[GPIO_GPCLR0] |= 1 << GPIO13;
@@ -184,7 +214,6 @@ void run_homing(axis_t *a) {
 	sd_state = SD_HOMING;
 
 	printf("Start homing axis %d\n", (int)a->axis_id);
-	printf("s = %d d = %d, ss = %d, c = %d\n", (int)a->step_pin, (int)a->dir_pin, (int)a->step_set, (int)a->step_clr);
 
 	volatile uint32_t *lev = &(gpio[a->nlim_lev]);
 	uint8_t pin = 1 << a->nlim_pin;
@@ -201,15 +230,20 @@ void run_homing(axis_t *a) {
 	a->enc.a_abs = 0;
 	read_enc(a);
 	a->target = 0;
+	a->target_a = 0;
 	printf("Axis %d offset is %f\n", (int)a->axis_id, a->enc.home_offset);
 }
 
 
 void set_target(axis_t *a, float t, float v_inv) {
-	a->target = 2*M_PI*t/a->mm_per_rev;
+	a->target = t;
+	a->target_a = 2*M_PI*t/a->mm_per_rev;
 	a->speed_inv = v_inv;
 }
 
+/*
+ * Get objects
+ */
 axis_t* get_x_axis() {
 	return &x_axis;
 }
@@ -226,6 +260,21 @@ uint32_t get_sd_state() {
 	return sd_state;
 }
 
+uint32_t axis_active(axis_t* a) {
+	if (fabs(a->pos - a->target) > MOTION_EPS) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+uint32_t motion_active() {
+	return axis_active(&x_axis) + axis_active(&y_axis);
+}
+
+/*
+ * setup variables
+ */
 void setup_vars() {
 	x_axis.pid.Kp = 1;
 	x_axis.pid.Kd = 1;
@@ -261,39 +310,10 @@ void setup_vars() {
 
 }
 
-/*
- * Main functions for cores
- */ 
-void sd_main() {
-
-	PWR_LED_ON();
-	printf("Starting from core %d\n", (int)get_core_id());
-
-	setup_vars();
-
-	irq_ctrl->enable_IRQ_basic |= RPI_BASIC_ARM_TIMER_IRQ;
-	step_en = 1;
-
-	run_homing(&x_axis);
-	run_homing(&y_axis);
-
-	sd_state = SD_READY;
-
-	uint32_t loop_t;
-
-	while(1) {
-		loop_t = CNT32();
-		update_pid(&x_axis);
-		update_pid(&y_axis);
-
-		waitcnt32(loop_t + CLKFREQ/1000); //1 ms update loop
-    }
-}
-
 void update_pid(axis_t *a) {
 	read_enc(a);
 
-	float e = (a->enc.a_abs - a->target);
+	float e = (a->enc.a_abs - a->target_a);
 	a->pid.de = e - a->pid.de;
 	a->pid.ie += e;
 	a->pid.e = e;

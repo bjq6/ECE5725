@@ -97,22 +97,24 @@ void __attribute__ ((naked)) mc_main() {
 
     set_target(y, 0, 5);
     set_target(x, 100, 5);
-    waitcnt32(CNT32() + CLKFREQ*10);
-
+    while(motion_active());
+    printf("At starting position (%f, %f)\n", x->pos, y->pos);
 
     //uint32_t loop_t = 0;
     
     while(1) {
         //loop_t = CNT32();
-        printf("At (%f, %f), move forward\n", x->pos, y->pos);
         set_target(x, 150, 2);
         set_target(y, 60, 2);
-        waitcnt32(CNT32() + CLKFREQ*15);
-        printf("At (%f, %f), move back\n", x->pos, y->pos);
+        while(motion_active());
+        printf("arrived at position (%f, %f)\n", x->pos, y->pos);
+        waitcnt32(CNT32() + CLKFREQ);
+
         set_target(x, 100, 2);
         set_target(y, 10, 2);
-        waitcnt32(CNT32() + CLKFREQ*15);
-
+        while(motion_active());
+        printf("arrived at position (%f, %f)\n", x->pos, y->pos);
+        waitcnt32(CNT32() + CLKFREQ);
     
     }
 }
@@ -124,7 +126,6 @@ void __attribute__ ((naked)) kernel_main() {
 
     start_core(mc_main, CORE1_ADR);
 
-    pin_setup();
     sd_main();
 
 }
