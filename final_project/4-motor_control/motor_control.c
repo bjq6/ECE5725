@@ -71,8 +71,6 @@ void _init() {
     // enable IRQ to trigger on UART rx
     irq_ctrl->enable_IRQ_1 |= (1 << 29);
 
-    irq_ctrl->enable_IRQ_basic |= RPI_BASIC_ARM_TIMER_IRQ;
-
     _enable_irq();
 
     printf("\n-----------------\n");
@@ -95,19 +93,25 @@ void __attribute__ ((naked)) mc_main() {
     printf("Starting motion controller\n");
 
     axis_t *x = get_x_axis();
+    axis_t *y = get_y_axis();
 
-    printf("pos = %f\n", x->enc.a_abs);
+    set_target(y, 0, 5);
+    set_target(x, 100, 5);
+    waitcnt32(CNT32() + CLKFREQ*10);
+
 
     //uint32_t loop_t = 0;
     
     while(1) {
         //loop_t = CNT32();
-        printf("At %f, move forward\n", x->pos);
-        set_target(x, 50, 3);
-        waitcnt32(CNT32() + CLKFREQ*10);
-        printf("At %f, move back\n", x->pos);
-        set_target(x, 10, 3);
-        waitcnt32(CNT32() + CLKFREQ*10);
+        printf("At (%f, %f), move forward\n", x->pos, y->pos);
+        set_target(x, 150, 2);
+        set_target(y, 60, 2);
+        waitcnt32(CNT32() + CLKFREQ*15);
+        printf("At (%f, %f), move back\n", x->pos, y->pos);
+        set_target(x, 100, 2);
+        set_target(y, 10, 2);
+        waitcnt32(CNT32() + CLKFREQ*15);
 
     
     }

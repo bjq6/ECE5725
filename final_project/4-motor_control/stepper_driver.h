@@ -20,6 +20,12 @@ enum {
 	SD_HOMING
 };
 
+enum {
+	X_AXIS = 0,
+	Y_AXIS,
+	Z_AXIS
+};
+
 typedef struct {
 	float e; 		// error
 	float de;		// de/dt
@@ -51,7 +57,7 @@ typedef struct {
 	float pos;
 	float target;
 	uint32_t speed_inv;
-	uint32_t step_div;
+	int32_t step_div;
 
 	float mm_per_rev;
 
@@ -79,6 +85,8 @@ typedef struct {
 	uint8_t nlim_set;
 	uint8_t nlim_clr;
 	uint8_t nlim_lev;
+
+	uint8_t axis_id;
 
 } axis_t;
 

@@ -72,7 +72,7 @@ Other registers hold info on pull up/down info, edge detection, value detection,
 #define ACT_LED_GPSET       GPIO_GPSET1
 #define ACT_LED_GPCLR       GPIO_GPCLR1
 #define ACT_LED_GPIO_BIT    GPIO47
-#define ACT_LED_OFF()       gpio[ACT_LED_GPCLR] = 1 << ACT_LED_GPIO_BIT;
+#define ACT_LED_OFF()       gpio[ACT_LED_GPCLR] = 1 << ACT_LED_GPIO_BIT; // requires that gpio be defined in the scope that calls this
 #define ACT_LED_ON()        gpio[ACT_LED_GPSET] = 1 << ACT_LED_GPIO_BIT;
 
 #define PWR_LED_GPFSEL      GPIO_GPFSEL3
