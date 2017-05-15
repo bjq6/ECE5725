@@ -51,6 +51,7 @@ typedef struct {
 	float pos;
 	float target;
 	uint32_t speed_inv;
+	uint32_t step_div;
 
 	float mm_per_rev;
 
@@ -71,13 +72,6 @@ typedef struct {
 	uint8_t dir_fbit;
 	uint8_t dir_set;
 	uint8_t dir_clr;
-
-	uint8_t plim_pin;
-	uint8_t plim_fsel;
-	uint8_t plim_fbit;
-	uint8_t plim_set;
-	uint8_t plim_clr;
-	uint8_t plim_lev;
 
 	uint8_t nlim_pin;
 	uint8_t nlim_fsel;
@@ -106,6 +100,8 @@ void pin_setup();
 
 void read_enc(axis_t *a);
 
+void update_pid(axis_t *a);
 
 void __attribute__ ((naked)) sd_main();
+
 #endif
