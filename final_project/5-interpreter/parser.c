@@ -6,12 +6,7 @@
 #include "parser.h"
 #include "nuts_bolts.h"
 
-// time it should take to complete one step
-#define time_to_cut 0.001 
-#define BUFF_SIZE 100
-#define PI 3.14159265
-
-bool read_line(char * line, int * g_code, float * f_val, float * r_val, float * x_val, float * y_val, float * z_val) {
+bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector * victor) {
 	uint8_t char_counter = 0;
 	char letter;
   	float value;
@@ -47,9 +42,9 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, float * 
 	      	switch(letter){
 	      		case 'F': *f_val = value; break;
 	      		case 'R': *r_val = value; break;
-	      		case 'X': *x_val = value; break;
-	      		case 'Y': *y_val = value; break;
-	      		case 'Z': *z_val = value; break;
+	      		case 'X': victor->x = value; break;
+	      		case 'Y': victor->y = value; break;
+	      		case 'Z': victor->z = value; break;
 	      		default:
 	      			printf("Didn't know what to do with letter '%c'.\n",letter);
 	      	}
@@ -58,23 +53,23 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, float * 
 	return 0;
 } 
 
-void process_linear(float coords[][3], float speeds[][3], float f, float x, float y, float z, float init_x, float init_y, float init_z){
+void process_linear(vector coords[], vector speeds[], float f, float x, float y, float z, float init_x, float init_y, float init_z){
 	float dx = x-init_x, dy = y-init_y, dz = z-init_z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	int num_steps = dist/(f*time_to_cut);
 
 	for (int n=0;n<num_steps+1;n++){
-		coords[n][0] = init_x+(n*dx)/num_steps; 
-		coords[n][1] = init_y+(n*dy)/num_steps; 
-		coords[n][2] = init_z+(n*dz)/num_steps; 
 
-		printf("Posit (%f, %f, %f)\n", coords[n][0], coords[n][1], coords[n][2]);
+		coords[n].x = init_x+(n*dx)/num_steps; 
+		coords[n].y = init_y+(n*dy)/num_steps; 
+		coords[n].z = init_z+(n*dz)/num_steps;
 
-		speeds[n][0] = dx/dist*f;
-		speeds[n][1] = dy/dist*f;
-		speeds[n][2] = dz/dist*f;
+		speeds[n].x = dx/dist*f;
+		speeds[n].y = dy/dist*f;
+		speeds[n].z = dz/dist*f;
 
-		printf("Speed (%f, %f, %f)\n", speeds[n][0], speeds[n][1], speeds[n][2]);
+		//printf("Posit (%f, %f, %f)\n", coords[n].x, coords[n].y, coords[n].z);
+		//printf("Speed (%f, %f, %f)\n", speeds[n][0], speeds[n][1], speeds[n][2]);
 	}
 }
 
@@ -97,7 +92,6 @@ float process_circular(int cc, float coords[][3], float speeds[][3], float f, fl
 		coords[n][2] = init_z+(n*dz)/num_steps; 
 
 		printf("Posit (%f, %f, %f)\n", coords[n][0], coords[n][1], coords[n][2]);
-
 	}
 }
 */
@@ -106,18 +100,18 @@ float process_circular(int cc, float coords[][3], float speeds[][3], float f, fl
 int main(){
 	char lin[] = "G01 X02 Y3";
 	int g_code = -1;
-	float f_val = -1, r_val = 0, x_val = 0, y_val = 0, z_val = 0;
-	read_line(lin, &g_code, &f_val, &r_val, &x_val, &y_val, &z_val);
-	//printf("Input Line: %s contains: \n", lin);
-	//printf("G= %i \t F=%i \t R= %i \t X= %i \t Y= %i \t Z= %i \n", g_code, f_val, r_val, x_val, y_val, z_val);
+	float f_val = -1, r_val = 0;
+	vector victor = { 0, 0, 0 };
 
-	float coords[BUFF_SIZE][3]; 
-	float speeds[BUFF_SIZE][3]; 
+	read_line(lin, &g_code, &f_val, &r_val, &victor);
+	// printf("Input Line: %s contains: \n", lin);
+	// printf("G= %i \t F=%i \t R= %i \t X= %i \t Y= %i \t Z= %i \n", g_code, f_val, r_val, x_val, y_val, z_val);
 
-	process_linear(coords, speeds, 100, 2, 4, 0, 0, 0, 0);
+	vector coords[BUFF_SIZE];
+	vector speeds[BUFF_SIZE];
 
-	//float x = -1, y = 0, z = 0, init_x = 1, init_y = 0, init_z = 0, r = 1;
-	
+
+	process_linear(coords, speeds, 100, 2, 4, 0, 0, 0, 0);	
 	
 }
 
