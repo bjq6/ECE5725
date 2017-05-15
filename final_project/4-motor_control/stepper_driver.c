@@ -8,7 +8,6 @@
 extern volatile uint32_t *gpio;
 extern volatile rpi_irq_controller_t *irq_ctrl;
 
-volatile int32_t step_div;
 volatile uint32_t step_en = 0;
 
 axis_t x_axis = {0};
@@ -22,6 +21,8 @@ volatile unsigned int enc_stack[1024];
 
 void pin_setup() {
 
+
+	// ==== X_AXIS =====
 	// setup step pin
 	x_axis.step_pin = GPIO19;
 	x_axis.step_fsel = GPIO19_FSEL;
@@ -53,25 +54,55 @@ void pin_setup() {
 	_set_gpio_pull(GPIO_BANK0, x_axis.enc.enc_pin, GPIO_PUP);
 
 	// setup positive limit pin
-	x_axis.plim_pin = GPIO2;
-	x_axis.plim_fsel = GPIO2_FSEL;
-	x_axis.plim_fbit = GPIO2_FBIT;
-	x_axis.plim_lev = GPIO_GPLEV0;
-	
-	gpio[x_axis.plim_fsel] &= ~(7 << x_axis.plim_fbit);
-
-	_set_gpio_pull(GPIO_BANK0, x_axis.plim_pin, GPIO_PUP);
-
-	// setup negative limit pin
-	x_axis.nlim_pin = GPIO27;
-	x_axis.nlim_fsel = GPIO27_FSEL;
-	x_axis.nlim_fbit = GPIO27_FBIT;
+	x_axis.nlim_pin = GPIO2;
+	x_axis.nlim_fsel = GPIO2_FSEL;
+	x_axis.nlim_fbit = GPIO2_FBIT;
 	x_axis.nlim_lev = GPIO_GPLEV0;
 	
 	gpio[x_axis.nlim_fsel] &= ~(7 << x_axis.nlim_fbit);
 
 	_set_gpio_pull(GPIO_BANK0, x_axis.nlim_pin, GPIO_PUP);
+
+	/*
+	// ==== Y_AXIS =====
+	// setup step pin
+	y_axis.step_pin = GPIO20;
+	y_axis.step_fsel = GPIO20_FSEL;
+	y_axis.step_fbit = GPIO20_FBIT;
+	y_axis.step_set = GPIO_GPSET0;
+	y_axis.step_clr	= GPIO_GPCLR0;
+
+	gpio[y_axis.step_fsel] &= ~(7 << y_axis.enc.enc_fbit);
+	gpio[y_axis.step_fsel] |= 1 << y_axis.step_fbit;
+
+	// setup direction pin
+	y_axis.dir_pin = GPIO21;
+	y_axis.dir_fsel = GPIO21_FSEL;
+	y_axis.dir_fbit = GPIO21_FBIT;
+	y_axis.dir_set = GPIO_GPSET0;
+	y_axis.dir_clr = GPIO_GPCLR0;
+
+	gpio[y_axis.dir_fsel] &= ~(7 << y_axis.enc.enc_fbit);
+	gpio[y_axis.dir_fsel] |= 1 << y_axis.dir_fbit;
+
+	// setup encoder pin
+	y_axis.enc.enc_pin = GPIO5;
+	y_axis.enc.enc_fsel = GPIO5_FSEL;
+	y_axis.enc.enc_fbit = GPIO5_FBIT;
+	y_axis.enc.enc_lev = GPIO_GPLEV0;
 	
+	gpio[y_axis.enc.enc_fsel] &= ~(7 << y_axis.enc.enc_fbit);
+	_set_gpio_pull(GPIO_BANK0, y_axis.enc.enc_pin, GPIO_PUP);
+
+	// setup positive limit pin
+	y_axis.nlim_pin = GPIO2;
+	y_axis.nlim_fsel = GPIO2_FSEL;
+	y_axis.nlim_fbit = GPIO2_FBIT;
+	y_axis.nlim_lev = GPIO_GPLEV0;
+	
+	gpio[y_axis.nlim_fsel] &= ~(7 << y_axis.nlim_fbit);
+	_set_gpio_pull(GPIO_BANK0, y_axis.nlim_pin, GPIO_PUP);
+	*/
 }
 
 /* 
@@ -85,13 +116,14 @@ void sd_IRQ() {
 	}
 
 	x_axis.step_cntr++;
+	
 
-	if (step_div) {
+	if (x_axis.step_div) {
 		ACT_LED_ON();
 
-		uint32_t step_div_mag = abs(step_div);
+		uint32_t step_div_mag = abs(x_axis.step_div);
 		if (x_axis.step_cntr >= step_div_mag) {
-			if (step_div > 0) {
+			if (x_axis.step_div > 0) {
 				set_dir(&x_axis, 1);
 				x_axis.step_pos++;
 			} else {
@@ -105,6 +137,28 @@ void sd_IRQ() {
 	} else {
 		ACT_LED_OFF();
 	}
+
+	// y_axis.step_cntr++;
+	// if (y_axis.step_div) {
+	// 	ACT_LED_ON();
+
+	// 	uint32_t step_div_mag = abs(y_axis.step_div);
+	// 	if (y_axis.step_cntr >= step_div_mag) {
+	// 		if (y_axis.step_div > 0) {
+	// 			set_dir(&y_axis, 1);
+	// 			y_axis.step_pos++;
+	// 		} else {
+	// 			set_dir(&y_axis, 0);
+	// 			y_axis.step_pos--;
+	// 		}
+
+	// 		step(&y_axis);
+	// 		y_axis.step_cntr = 0;
+	// 	}
+	// } else {
+	// 	ACT_LED_OFF();
+	// }
+
 }
 
 /* 
@@ -127,14 +181,18 @@ void set_dir(axis_t *a, uint8_t dir) {
 void run_homing(axis_t *a) {
 	sd_state = SD_HOMING;
 	printf("Start homing\n");
-	volatile uint32_t *lev = &(gpio[a->plim_lev]);
-	uint8_t pin = 1 << a->plim_pin;
+	volatile uint32_t *lev = &(gpio[a->nlim_lev]);
+	uint8_t pin = 1 << a->nlim_pin;
 
-	step_div = -10;
+	x_axis.step_div = -20;
 
 	a->enc.home_offset = 0;
-	while ((*lev & pin));
-	step_div = 0;
+	while ((*lev & pin)) {
+		read_enc(a);
+		printf("%f\n", a->enc.a_abs);
+		waitcnt32(CNT32() + CLKFREQ/10);
+	}
+	x_axis.step_div = 0;
  
 	read_enc(a);
 	a->enc.home_offset = a->enc.a;
@@ -176,6 +234,7 @@ void setup_vars() {
 	x_axis.enc.a = 0;
 	x_axis.enc.a_abs = 0;
 	x_axis.speed_inv = 10000;
+	x_axis.step_div = 0;
 
 	x_axis.mm_per_rev = 8.0;
 	set_dir(&x_axis, 1);
@@ -192,7 +251,6 @@ void sd_main() {
 
 	setup_vars();
 
-	step_div = 0;
 	step_en = 1;
 
 	run_homing(&x_axis);
@@ -203,6 +261,7 @@ void sd_main() {
 
 	while(1) {
 		loop_t = CNT32();
+		//update_pid(&x_axis);
 		read_enc(&x_axis);
 
 		float e = (x_axis.enc.a_abs - x_axis.target);
@@ -210,23 +269,47 @@ void sd_main() {
 		x_axis.pid.ie += e;
 		x_axis.pid.e = e;
 
-		step_div = -(int)(x_axis.pid.Kp/x_axis.pid.e + x_axis.pid.Kd/x_axis.pid.de + x_axis.pid.Ki/x_axis.pid.ie)*x_axis.speed_inv;
+		x_axis.step_div = -(int)(x_axis.pid.Kp/x_axis.pid.e + x_axis.pid.Kd/x_axis.pid.de + x_axis.pid.Ki/x_axis.pid.ie)*x_axis.speed_inv;
 
 
-		if (step_div == 0) {
+		if (x_axis.step_div == 0) {
 			if (x_axis.pid.e < 0) {
-				step_div = x_axis.speed_inv;
+				x_axis.step_div = x_axis.speed_inv;
 			} else {
-				step_div = -x_axis.speed_inv;
+				x_axis.step_div = -x_axis.speed_inv;
 			}
 		}
 
-		if (step_div > 1000 || step_div < -1000) {
-			step_div = 0;
+		if (x_axis.step_div > 1000 || x_axis.step_div < -1000) {
+			x_axis.step_div = 0;
 		}
 
 		waitcnt32(loop_t + CLKFREQ/1000); //1 ms update loop
     }
+}
+
+void update_pid(axis_t *a) {
+	read_enc(a);
+
+	float e = (a->enc.a_abs - a->target);
+	a->pid.de = e - a->pid.de;
+	a->pid.ie += e;
+	a->pid.e = e;
+
+	a->step_div = -(int)(a->pid.Kp/a->pid.e + a->pid.Kd/a->pid.de + a->pid.Ki/a->pid.ie)*a->speed_inv;
+
+
+	if (a->step_div == 0) {
+		if (a->pid.e < 0) {
+			a->step_div = a->speed_inv;
+		} else {
+			a->step_div = -a->speed_inv;
+		}
+	}
+
+	if (a->step_div > 1000 || a->step_div < -1000) {
+		a->step_div = 0;
+	}
 }
 
 void read_enc(axis_t *a) {
