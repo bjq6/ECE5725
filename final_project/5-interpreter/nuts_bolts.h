@@ -1,6 +1,8 @@
 #ifndef nuts_bolts_h
 #define nuts_bolts_h
 
+#include <stdint.h>
+
 typedef int bool;
 #define true 1
 #define false 0
@@ -30,5 +32,6 @@ bool read_num(char str[], char c, float * ptr);
 /*  	From grbl's nuts_bolts file for reading floats
  */
 uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr);
+
 
 #endif

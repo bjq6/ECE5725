@@ -23,4 +23,6 @@ typedef struct {
 //bool read_line(char * line, int * g_code, float * f_val, float * r_val, float * x_val, float * y_val, float * z_val);
 bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector * victor);
 
+void read_file(char* fileName);
+
 #endif

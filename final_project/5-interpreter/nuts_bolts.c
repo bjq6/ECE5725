@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
+#include <math.h>
 #include "nuts_bolts.h"
 
 #define MAX_INT_DIGITS 8
@@ -115,3 +118,15 @@ uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr)
 
   return(true);
 }
+
+void read_file(char* fileName){
+    FILE* file = fopen(fileName, "r"); 
+    char line[256];
+
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line); 
+    }
+
+    fclose(file);
+}
+    
