@@ -66,28 +66,33 @@ void process_linear(queue * pos_q, vector * dest, vector * init){
 	}
 }
 
-/*
-void process_circular(vector coords[], vector speeds[], float f, vector dest, vector init){
-	float dx = dest.x-init.x, dy = dest.y-init.y, dz = dest.z-init.z;
+void process_circular(queue * pos_q, vector * dest, vector * init, float r, int cc){
+	float dx = dest->x-init->x, dy = dest->y-init->y, dz = dest->z-init->z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	float theta = 2*asin(.5*dist/r);
 	float arc_dist = r*theta;
+	float d = dist/2;
 
-	int num_steps = arc_dist/(f*time_to_cut);
+	float mid_x = (dest->x+init->x)/2;
+	float mid_y = (dest->y+init->y)/2;
 
+	float h = sqrt(r*r - d*d);
+
+	int num_steps = arc_dist/STEP_SIZE;
 	float theta_per_seg = theta/num_steps;
-	float x_o = 
-	float y_o = 
+
+	float x_o = mid_x + cc*h*dy/dist;
+	float y_o = mid_y - cc*h*dx/dist;
+
+	float alpha = atan2(init->y-y_o, init->x-x_o);
 
 	for (int n=0;n<num_steps+1;n++){
-		coords[n][0] = init_x+(n*dx)/num_steps; 
-		coords[n][1] = init_y+(n*dy)/num_steps; 
-		coords[n][2] = init_z+(n*dz)/num_steps; 
-
-		printf("Posit (%f, %f, %f)\n", coords[n][0], coords[n][1], coords[n][2]);
+		float beta = alpha-cc*n*theta_per_seg;
+		vector pos = {x_o + r*cos(beta), y_o + r*sin(beta)};
+		insert( pos_q, pos );
 	}
+	
 }
-*/
 
 void read_file(char* fileName){
     FILE* file = fopen(fileName, "r"); 
