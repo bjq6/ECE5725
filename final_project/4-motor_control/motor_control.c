@@ -105,14 +105,14 @@ void __attribute__ ((naked)) mc_main() {
     
     while(1) {
         //loop_t = CNT32();
-        set_target(170, 90, 1);
+        set_target(170, 90, 0.1);
         //set_target_axis(x, 170, 8);
         //set_target_axis(y, 90, 8);
         while(motion_active());
         printf("arrived at position (%f, %f)\n", x->pos, y->pos);
         waitcnt32(CNT32() + CLKFREQ);
 
-        set_target(100, 10, 1);
+        set_target(100, 10, 0.1);
         //set_target_axis(x, 100, 8);
         //set_target_axis(y, 10, 8);
         while(motion_active());

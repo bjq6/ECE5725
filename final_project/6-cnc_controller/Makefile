@@ -4,7 +4,7 @@ AFLAGS = -mfpu=neon-vfpv4 -mfloat-abi=hard
 CFLAGS = -Wall -Werror -O2 -nostartfiles -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -fdata-sections -ffunction-sections
 LFLAGS = -L/usr/local/gcc-arm-none-eabi-5_4-2016q3/lib/gcc/arm-none-eabi/5.4.1/fpu -L/usr/local/gcc-arm-none-eabi-5_4-2016q3/arm-none-eabi/lib/fpu -lgcc -lc -lm
 
-TARGET = motor_control
+TARGET = cnc_controller
 OBJDIR = obj
 BCMDIR = bcm
 
