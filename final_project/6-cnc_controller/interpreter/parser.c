@@ -53,8 +53,8 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 	return 0;
 } 
 
-void process_linear(vector coords[], vector speeds[], float f, float x, float y, float z, float init_x, float init_y, float init_z){
-	float dx = x-init_x, dy = y-init_y, dz = z-init_z;
+void process_linear(vector coords[], vector speeds[], float f, vector dest, vector init){
+	float dx = dest.x-init.x, dy = dest.y-init.y, dz = dest.z-init.z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	int num_steps = dist/(f*time_to_cut);
 
@@ -74,8 +74,8 @@ void process_linear(vector coords[], vector speeds[], float f, float x, float y,
 }
 
 /*
-float process_circular(int cc, float coords[][3], float speeds[][3], float f, float r, float x, float y, float z, float init_x, float init_y, float init_z){
-	float dx = x-init_x, dy = y-init_y, dz = z-init_z;
+void process_circular(vector coords[], vector speeds[], float f, vector dest, vector init){
+	float dx = dest.x-init.x, dy = dest.y-init.y, dz = dest.z-init.z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	float theta = 2*asin(.5*dist/r);
 	float arc_dist = r*theta;
@@ -96,7 +96,18 @@ float process_circular(int cc, float coords[][3], float speeds[][3], float f, fl
 }
 */
 
+void read_file(char* fileName){
+    FILE* file = fopen(fileName, "r"); 
+    char line[256];
 
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line); 
+    }
+
+    fclose(file);
+}
+
+/*
 int main(){
 	char lin[] = "G01 X02 Y3";
 	int g_code = -1;
@@ -110,9 +121,13 @@ int main(){
 	vector coords[BUFF_SIZE];
 	vector speeds[BUFF_SIZE];
 
+	vector init = {0, 0, 0};
+	vector dest = {2, 4, 0};
 
+	// process_linear(coords, speeds, 100, 2, 4, 0, 0, 0, 0);
 	process_linear(coords, speeds, 100, 2, 4, 0, 0, 0, 0);	
 	
 }
+*/
 
 

@@ -1,3 +1,5 @@
+#ifndef queue_h
+#define queue_h
 
 #include "parser.h"
 
@@ -17,3 +19,5 @@ int isFull(queue *q);
 int size(queue *q);
 void insert(queue *q, vector data);
 vector removeData(queue *q);
+
+#endif
