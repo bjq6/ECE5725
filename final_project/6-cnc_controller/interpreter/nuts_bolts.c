@@ -23,27 +23,6 @@ bool find_first(char str[], char c, int * ptr){
 
 }
 
-bool read_num(char str[], char c, float * ptr){
-
-	int char_loc;
-
-	if (!find_first(str, c, &char_loc)){ 
-		FAIL("FAILURE:read_num - Character does not exist in string"); 
-		return 0;
-	}
-	else {
-		int next = char_loc+1; 
-		if (!isdigit(str[next])) { return 0; }
-
-		while (isdigit(str[next])||str[next]=='.'){ next++; }
-		char* substr;
-		strncpy(substr, str+char_loc+1, next-char_loc-1);
-		*ptr = atof(substr);
-		return 1;
-	}
-	return 0; // not needed but there for safety
-}
-
 uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr)
 {
   char *ptr = line + *char_counter;
@@ -117,16 +96,5 @@ uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr)
   *char_counter = ptr - line - 1; // Set char_counter to next statement
 
   return(true);
-}
-
-void read_file(char* fileName){
-    FILE* file = fopen(fileName, "r"); 
-    char line[256];
-
-    while (fgets(line, sizeof(line), file)) {
-        printf("%s", line); 
-    }
-
-    fclose(file);
 }
     

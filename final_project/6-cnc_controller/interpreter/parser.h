@@ -1,20 +1,16 @@
 #ifndef parser_h
 #define parser_h
 
+#include "queue.h"
+
 // time it should take to complete one step
-#define time_to_cut 0.001 
+#define time_to_cut 0.01 
 #define BUFF_SIZE 100
 #define PI 3.14159265
 
 typedef int bool;
 #define true 1
 #define false 0
-
-typedef struct {
-	float x;
-	float y;
-	float z;
-} vector;
 
 /*	read_line takes in a line to read and returns:
  * 			> true	= 	line is valid command and the proper values are set
@@ -25,6 +21,6 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 
 void read_file(char* fileName);
 
-void process_linear(vector coords[], vector speeds[], float f, vector dest, vector init);
+void process_linear(queue * pos_q, queue * speed_q, float f, vector * dest, vector * init);
 
 #endif

@@ -1,7 +1,11 @@
 #ifndef queue_h
 #define queue_h
 
-#include "parser.h"
+typedef struct {
+	float x;
+	float y;
+	float z;
+} vector;
 
 #define MAX 100
 

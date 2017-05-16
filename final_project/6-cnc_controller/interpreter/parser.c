@@ -54,13 +54,15 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 } 
 
 void process_linear(queue * pos_q, queue * speed_q, float f, vector * dest, vector * init){
-	float dx = dest.x-init.x, dy = dest.y-init.y, dz = dest.z-init.z;
+	float dx = dest->x-init->x, dy = dest->y-init->y, dz = dest->z-init->z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	int num_steps = dist/(f*time_to_cut);
 
+	printf("%d steps in this motion\n", num_steps);
+
 	for (int n=0;n<num_steps+1;n++){
 
-		vector pos_step = {init->x+(n*dx)/num_steps, init->y+(n*dy)/num_steps, init->z+(n*dz)/num_steps }
+		vector pos_step = {init->x+(n*dx)/num_steps, init->y+(n*dy)/num_steps, init->z+(n*dz)/num_steps};
 
 		insert(pos_q, pos_step);
 

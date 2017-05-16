@@ -17,9 +17,6 @@ axis_t z_axis = {0};
 
 uint32_t sd_state = SD_NOTREADY;
 
-volatile unsigned int sd_stack[1024];
-volatile unsigned int enc_stack[1024];
-
 void setup_vars();
 void setup_pins();
 uint32_t axis_active(axis_t* a);
@@ -294,9 +291,9 @@ uint32_t motion_active() {
  * setup variables
  */
 void setup_vars() {
-	x_axis.pid.Kp = 1;
+	x_axis.pid.Kp = 0.5;
 	x_axis.pid.Kd = 1;
-	x_axis.pid.Ki = .1;
+	x_axis.pid.Ki = 1;
 	x_axis.step_target = 0;
 	x_axis.step_pos = 0;
 	x_axis.enc.r = 0;
@@ -310,9 +307,9 @@ void setup_vars() {
 	x_axis.mm_per_rev = 8.0;
 	set_dir(&x_axis, 1);
 
-	y_axis.pid.Kp = 1;
+	y_axis.pid.Kp = 0.5;
 	y_axis.pid.Kd = 1;
-	y_axis.pid.Ki = .1;
+	y_axis.pid.Ki = 1;
 	y_axis.step_target = 0;
 	y_axis.step_pos = 0;
 	y_axis.enc.r = 0;

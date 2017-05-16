@@ -29,7 +29,8 @@ $(OBJDIR)/$(TARGET).elf : $(OBJDIR)/vectors.o $(OBJDIR)/$(TARGET).o $(OBJDIR)/rp
 						$(OBJDIR)/rpi-systimer.o $(OBJDIR)/rpi-gpio.o $(OBJDIR)/rpi-armtimer.o \
 						$(OBJDIR)/rpi-interrupts.o $(OBJDIR)/rpi-aux.o $(OBJDIR)/rpi-mailbox.o \
 						$(OBJDIR)/rpi-mailbox-interface.o $(OBJDIR)/rpi-multicore.o $(OBJDIR)/syscalls.o \
-						$(OBJDIR)/stepper_driver.o ## inclue the other targets here. $(OBJDIR)/printf.o
+						$(OBJDIR)/stepper_driver.o $(OBJDIR)/queue.o $(OBJDIR)/parser.o \
+						$(OBJDIR)/nuts_bolts.o## inclue the other targets here. $(OBJDIR)/printf.o
 
 	$(ARMGNU)-gcc $^ $(CFLAGS) $(LFLAGS) -T $(BCMDIR)/memmap -o $@
 	$(ARMGNU)-objdump -D $@ > $@.list
@@ -74,6 +75,15 @@ $(OBJDIR)/syscalls.o : $(BCMDIR)/syscalls.c
 
 ## Actual program code
 $(OBJDIR)/stepper_driver.o : stepper_driver.c stepper_driver.h
+	$(ARMGNU)-gcc $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/queue.o : interpreter/queue.c interpreter/queue.h
+	$(ARMGNU)-gcc $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/parser.o : interpreter/parser.c interpreter/parser.h
+	$(ARMGNU)-gcc $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/nuts_bolts.o : interpreter/nuts_bolts.c interpreter/nuts_bolts.h
 	$(ARMGNU)-gcc $(CFLAGS) -c $< -o $@
 
 ## create other (C) object with this. Copy as example above for assembly 
