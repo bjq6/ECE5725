@@ -216,7 +216,7 @@ void run_homing(axis_t *a) {
 	volatile uint32_t *lev = &(gpio[a->nlim_lev]);
 	uint8_t pin = 1 << a->nlim_pin;
 
-	a->step_div = -40;
+	a->step_div = -20;
 
 	a->enc.home_offset = 0;
 	while ((*lev & pin));
@@ -253,7 +253,7 @@ void set_target(float x, float y, float f) {
 	set_target_axis(&x_axis, x, vx_inv);
 	set_target_axis(&y_axis, y, vy_inv);
 
-	printf("%d, %d\n", vx_inv, vy_inv);
+	//printf("%d, %d\n", vx_inv, vy_inv);
 }
 
 /*
