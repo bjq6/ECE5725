@@ -1,10 +1,17 @@
-#include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
 #include <math.h>
+#include "interpreter/parser.h"
+#include "interpreter/nuts_bolts.h"
+#include "interpreter/queue.h"
 
 #include "bcm/bcm-includes.h"
 
 #include "stepper_driver.h"
+
+#define SPEED_PER_UNIT 15 // mm/min
 
 volatile uint32_t *gpio;
 volatile rpi_arm_timer_t *timer;
@@ -80,6 +87,75 @@ void __attribute__ ((naked)) pp_main() {
     _init_sp((unsigned int *)CORE2_STACK);
     _init_core();
 
+    while(get_sd_state() != SD_READY);
+
+    printf("Starting path planner\n");
+    axis_t *x = get_x_axis();
+    axis_t *y = get_y_axis();
+
+    set_target(10, 10, 0.5);
+
+    while(motion_active());
+    printf("At starting position (%f, %f)\n", x->pos, y->pos);
+
+
+    // File
+    const char * gcode_file[]={
+        "G00 X10 Y10",
+        "G01 X40 Y40",
+        "G01 X60 Y40",
+        "G01 X60 Y60"
+        //"G02 X30 Y30",
+        "End of File"
+    };
+
+    int n = 0;
+
+    queue pos_q;
+    queue speed_q;
+    init_q(&pos_q);
+    init_q(&speed_q);
+
+    uint32_t loop_t = 0;
+
+    while ( strcmp( gcode_file[n], "End of File" ) != 0 ) {
+        // Initializations
+        int g_code = -1;
+        float f_val = -1, r_val = 0;
+        vector victor = { 0, 0, 0 };
+        vector pos = {x->pos, y->pos, 0};
+
+        // Populate Initializations from current GCode command
+        read_line((char*)gcode_file[n], &g_code, &f_val, &r_val, &victor);
+
+        switch(g_code){
+            case 0: 
+            case 1: 
+                process_linear(&pos_q, &speed_q, f_val, &victor, &pos);
+                break;
+            case 2: 
+            case 3: 
+                break;
+            default: 
+                printf("Weird... I thought this would have been caught earlier.\n");
+        }
+
+        // process queue to get motion
+        while (!isEmpty(pos_q)) {
+            loop_t = CNT32();
+            vector p = removeData(pos_q);
+            set_target(p[0], p[1], f_val/SPEED_PER_UNIT);
+
+            waitcnt32(loop_t + time_to_cut*CLKFREQ);
+        }
+
+        printf("%s\n", gcode_file[n]); 
+        n++;
+
+        
+    }
+    printf("\n");
+
     while(1);
 }
 
@@ -122,7 +198,7 @@ void __attribute__ ((naked)) kernel_main() {
 
     ACT_LED_ON();
 
-    start_core(mc_main, CORE1_ADR);
+    start_core(pp_main, CORE1_ADR);
 
     sd_main();
 
