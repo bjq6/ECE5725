@@ -4,7 +4,7 @@
 #include "queue.h"
 
 // time it should take to complete one step
-#define time_to_cut 0.01 
+#define STEP_SIZE 0.5 // mm
 #define BUFF_SIZE 100
 #define PI 3.14159265
 
@@ -21,6 +21,6 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 
 void read_file(char* fileName);
 
-void process_linear(queue * pos_q, queue * speed_q, float f, vector * dest, vector * init);
+void process_linear(queue * pos_q, vector * dest, vector * init);
 
 #endif
