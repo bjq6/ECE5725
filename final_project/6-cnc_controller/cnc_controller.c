@@ -188,7 +188,7 @@ void __attribute__ ((naked)) iface_entry() {
     _init_sp((unsigned int *)CORE2_STACK);
     _init_core();
 
-    mc_main();
+    iface_main();
 }
 
 void __attribute__ ((naked)) kernel_main() {
@@ -197,7 +197,7 @@ void __attribute__ ((naked)) kernel_main() {
     ACT_LED_ON();
 
     start_core(mc_entry, CORE1_ADR);
-    start_core(iface_entry, CORE2_ADR);
+    //start_core(iface_entry, CORE2_ADR);
 
     sd_main();
 
