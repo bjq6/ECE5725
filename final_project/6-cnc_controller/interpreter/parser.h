@@ -22,5 +22,6 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 void read_file(char* fileName);
 
 void process_linear(queue * pos_q, vector * dest, vector * init);
+void process_circular(queue * pos_q, vector * dest, vector * init, float r, int cc);
 
 #endif
