@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define SD_T_STEP 			64
+#define SD_T_STEP 			16
 #define MOTION_EPS			0.1
 
 enum {
@@ -93,7 +93,8 @@ uint32_t get_sd_state();
 uint32_t motion_active();
 
 // setters
-void set_target(axis_t *a, float t, float v_inv);
+void set_target_axis(axis_t *a, float t, float v_inv);
+void set_target(float x, float y, float f);
 
 void sd_IRQ();
 

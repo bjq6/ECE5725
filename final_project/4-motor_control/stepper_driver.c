@@ -7,6 +7,7 @@
 
 extern volatile uint32_t *gpio;
 extern volatile rpi_irq_controller_t *irq_ctrl;
+extern volatile rpi_arm_timer_t *timer;
 
 volatile uint32_t step_en = 0;
 
@@ -218,7 +219,7 @@ void run_homing(axis_t *a) {
 	volatile uint32_t *lev = &(gpio[a->nlim_lev]);
 	uint8_t pin = 1 << a->nlim_pin;
 
-	a->step_div = -20;
+	a->step_div = -40;
 
 	a->enc.home_offset = 0;
 	while ((*lev & pin));
@@ -235,10 +236,27 @@ void run_homing(axis_t *a) {
 }
 
 
-void set_target(axis_t *a, float t, float v_inv) {
+void set_target_axis(axis_t *a, float t, float v_inv) {
 	a->target = t;
 	a->target_a = 2*M_PI*t/a->mm_per_rev;
 	a->speed_inv = v_inv;
+}
+
+void set_target(float x, float y, float f) {
+	float dx = x - x_axis.pos;
+	float dy = y - y_axis.pos;
+	float r = sqrt(dx*dx + dy*dy);
+
+	float vx = f*dx/r;
+	float vy = f*dy/r;
+
+	int vx_inv = abs(10/vx);
+	int vy_inv = abs(10/vy);
+
+	set_target_axis(&x_axis, x, vx_inv);
+	set_target_axis(&y_axis, y, vy_inv);
+
+	printf("%d, %d\n", vx_inv, vy_inv);
 }
 
 /*
