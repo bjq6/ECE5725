@@ -45,10 +45,22 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="#about">About</a>
+                        <a href="#design ">Design</a>
                     </li>
                     <li>
-                        <a href="#services">Services</a>
+                        <a href="#testing ">Testing</a>
+                    </li>
+                    <li>
+                        <a href="#drawings ">Drawings</a>
+                    </li>
+                    <li>
+                        <a href="#results ">Results</a>
+                    </li>
+                    <li>
+                        <a href="#conclusion ">Conclusion</a>
+                    </li>
+                    <li>
+                        <a href="#code ">Code Appendix</a>
                     </li>
                     <li>
                         <a href="#contact">Contact</a>
@@ -65,7 +77,7 @@
         <div class="headline">
             <div class="container">
                 <h1>CNC Controller</h1>
-                <h2>Will Knock Your Socks Off</h2>
+                <h3>Project by Nikita Ermoshkin, Brendan Quinn</h3>
             </div>
         </div>
     </header>
@@ -73,35 +85,135 @@
     <!-- Page Content -->
     <div class="container">
 
-        <hr class="featurette-divider">
+        <br>
 
         <!-- First Featurette -->
-        <div class="featurette" id="about">
+        <div class="featurette">
+            <h2 class="featurette-heading">Objective</h2>
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <div class="center-block">
+            <iframe class="centered" align="middle" width="640" height="360" src="https://www.youtube.com/embed/AD1gbUsxDfo" frameborder="0" allowfullscreen=""></iframe>
+            <h4 style="text-align:center;">Demonstration Video</h4>
+        </div>
+        
+
+        <hr class="featurette-divider" id="introduction">
+
+        <!-- First Featurette -->
+        <div class="featurette">
             <img class="featurette-image img-circle img-responsive pull-right" src="img/cnc-pic.jpg">
-            <h2 class="featurette-heading">This First Heading
-                <span class="text-muted">Will Catch Your Eye</span>
+            <h2 class="featurette-heading">Introduction
+                <span class="text-muted">to the CNC Controller</span>
             </h2>
             <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
         </div>
 
-        <hr class="featurette-divider">
+        <hr class="featurette-divider" id="design">
+
+        <div class="featurette">
+            <h2 class="featurette-heading">Design
+                <span class="text-muted">of Hardware and Software</span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <div class="container">
+          <h2>GCode Table</h2>
+          <p>The table outlines the GCode commands accepted by the CNC machine.</p>            
+          <table class="table table-bordered">
+            <thead>
+              <tr class="danger">
+                <th>GCode</th>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>G00</td>
+                <td>Rapid Positioning</td>
+                <td>Move each axis at its max speed until it reaches the positionit was trying to reach.  Traditionally used to move the bit to astarting location or ending location.</td>
+              </tr>
+              <tr>
+                <td>G01</td>
+                <td>Linear Interpolation </td>
+                <td>Move the tool from the current location to the given location in a linear path between the points by interpolating steps between the positions.</td>
+              </tr>
+              <tr>
+                <td>G02</td>
+                <td>Circular Interpolation, Clockwise</td>
+                <td>Move the tool from the current location to the given location in a clockwise arc from another given center point by interpolating steps along the arc.</td>
+              </tr>
+              <tr>
+                <td>G03</td>
+                <td>Circular Interpolation, Counterclockwise</td>
+                <td>Move the tool from the current location to the given location in a counterclockwise arc from another given center point by interpolating steps along the arc.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="featurette-divider" id="testing">
 
         <!-- Second Featurette -->
-        <div class="featurette" id="services">
-            <img class="featurette-image img-circle img-responsive pull-left" src="img/cnc-cad.jpg">
-            <h2 class="featurette-heading">The Second Heading
-                <span class="text-muted">Is Pretty Cool Too.</span>
+        <div class="featurette">
+            <h2 class="featurette-heading">Testing
+                <span class="text-muted">each part of the system</span>
             </h2>
             <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
         </div>
 
-        <hr class="featurette-divider">
+        <hr class="featurette-divider" id="drawings">
 
         <!-- Third Featurette -->
-        <div class="featurette" id="contact">
+        <div class="featurette">
             <img class="featurette-image img-circle img-responsive pull-right" src="http://placehold.it/500x500">
-            <h2 class="featurette-heading">The Third Heading
-                <span class="text-muted">Will Seal the Deal.</span>
+            <h2 class="featurette-heading">Drawings
+                <span class="text-muted"></span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <hr class="featurette-divider" id="results">
+
+        <div class="featurette">
+            <h2 class="featurette-heading">Results
+                <span class="text-muted"></span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <hr class="featurette-divider" id="conclusion">
+
+        <div class="featurette">
+            <h2 class="featurette-heading">Conclusion
+                <span class="text-muted"></span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <hr class="featurette-divider" id="code">
+
+        <div class="featurette">
+            <h2 class="featurette-heading">Code Appendix
+                <span class="text-muted"></span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <hr class="featurette-divider" id="contact">
+
+        <div class="featurette">
+            <h2 class="featurette-heading">Contact
+                <span class="text-muted"></span>
             </h2>
             <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
         </div>
@@ -112,7 +224,7 @@
         <footer>
             <div class="row">
                 <div class="col-lg-12">
-                    <p>Copyright &copy; Your Website 2014</p>
+                    <p>Copyright &copy; Brendan Quinn and Nikita Ermoshkin - May 2017</p>
                 </div>
             </div>
         </footer>
