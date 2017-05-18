@@ -7,7 +7,7 @@ typedef struct {
 	float z;
 } vector;
 
-#define MAX 100
+#define MAX 1000
 
 typedef struct{
    vector vecArray[MAX];

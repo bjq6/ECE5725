@@ -3,13 +3,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "interpreter/parser.h"
 #include "interpreter/nuts_bolts.h"
 #include "interpreter/queue.h"
-
 #include "bcm/bcm-includes.h"
-
 #include "stepper_driver.h"
+#include "gcode_demos.h"
 
 #define SPEED_DIV 2.5
 
@@ -21,12 +21,26 @@ volatile aux_t *aux;
 volatile uint8_t uart_buffer[80] = {0};
 volatile uint8_t buf_ptr = 0;
 
+volatile int reset;
+volatile int cycle_start;
+volatile int demo;
+
+#define F_RAPID 2.5
+
+enum {
+    CMD_NONE = 0,
+    CMD_DEMO,
+    CMD_CYCLE_START,
+    CMD_RESET,
+};
+
 IRQ() {
     if (timer->maskedIRQ == 1) { // timer ISR 
         sd_IRQ();
     } else if ((aux->MU_IIR & 0x6) == 4) { // UART ISR
         uint8_t c = _uart_rx(); // get it out of the buffer to clear the interrupt
         uart_buffer[buf_ptr++] = c;
+        _uart_tx(c);
     }
 
     timer->IRQclear = 1;
@@ -80,101 +94,194 @@ void _init() {
             RPI_ARMTIMER_CTRL_PRESCALE_1;
     
     // enable IRQ to trigger on UART rx
-    irq_ctrl->enable_IRQ_1 |= (1 << 29);
+    //irq_ctrl->enable_IRQ_1 |= (1 << 29);
 
     _enable_irq();
 
     printf("\n-----------------\n");
 }
 
+uint8_t process_cmd(char *cmd, uint8_t *val) {
+    if (cmd[0] != '$') return CMD_NONE;
+
+    switch (cmd[1]) {
+        case 'c':
+            return CMD_CYCLE_START;
+            break;
+        case 'r':
+            return CMD_RESET;
+            break;
+        case 'd':
+            *val = cmd[2]-48;
+            return CMD_DEMO;
+            break;
+        default:
+            return CMD_NONE;
+    }
+}
+
 void iface_main() {
+    printf("Starting Interface Core\n");
+
+    buf_ptr = 0;
+
     while(1) {
-        if (buf_ptr) {
-            printf("%s\n", (char*)uart_buffer);
-            waitcnt32(CNT32() + CLKFREQ/5);
+        if (_uart_check()) {
+            uint8_t c = _uart_rx();
+            uart_buffer[buf_ptr++] = c;
+            //_uart_tx(c);
+            if (c == '\n') {
+                uart_buffer[buf_ptr] = 0;
+                printf("%s", uart_buffer);
+                buf_ptr = 0;
+                uint8_t v = 0;
+                uint8_t cmd = process_cmd((char*)uart_buffer, &v);
+
+                switch (cmd) {
+                    case CMD_CYCLE_START:
+                        cycle_start = 1;
+                        break;
+                    case CMD_RESET:
+                        reset = 1;
+                        break;
+                    case CMD_DEMO:
+                        demo = v;
+                        break;
+                    case CMD_NONE:
+                    default:
+                        break;
+                }
+            }
         }
     }
 }
 
 void mc_main() {
+    reset = 0;
+    cycle_start = 0;
+    demo = 0;
+
     while(get_sd_state() != SD_READY);
 
     printf("Starting path planner\n");
     axis_t *x = get_x_axis();
     axis_t *y = get_y_axis();
 
-    set_target(10, 10, 0.5);
+    set_target(10, 10, F_RAPID/SPEED_DIV);
     while(motion_active());
+    set_target(10, 10, 0.1);
 
-    printf("At starting position (%f, %f)\n", x->pos, y->pos);
+    while(1) {
+            
+        char *gf = gdemo1; 
+        do {
+            while (!cycle_start);
+            cycle_start = 0;
 
-    char *buf = "G00 X20 Y10\0G01 X40 Y40\0G01 X60 Y40\0G01 X60 Y60\0End of File";
+            switch(demo) {
+                case 1:
+                    gf = gdemo1;
+                    break;
+                case 2:
+                    gf = gdemo2;
+                    break;
+                case 3:
+                    gf = gdemo3;
+                    break;
+                default:
+                    demo = 0;
+                    printf("Please select a demo by entering $d[n]\n");
+            }
+        } while (demo == 0);
 
-    char *gcode_file[80];
+        printf("demo %d\n", (int)demo);
+        printf("%d, %d\n", (int)gf, (int)gdemo3);
 
-    gcode_file[0] = buf;
-    gcode_file[1] = buf + 12;
-    gcode_file[2] = buf + 24;
-    gcode_file[3] = buf + 36;
-    gcode_file[4] = buf + 48;
+        printf("Cycle start\n");
 
-    int n = 0;
+        char *gcode_file[80];
 
-    queue pos_q;
-    queue speed_q;
-    init_q(&pos_q);
-    init_q(&speed_q);
+        int n=0;
+        int i=0;
+        int acc=0;
+        gcode_file[0] = gf;
 
-    //uint32_t loop_t = 0;
-    //vector pos0 = {10, 10, 0};
-
-    while (strcmp( gcode_file[n], "End of File" ) != 0) {
-        // Initializations
-        int g_code = -1;
-        float f_val =   2, r_val = 0;
-        vector victor = { 0, 0, 0 };
-        //vector pos = pos0;
-
-        // Populate Initializations from current GCode command
-        read_line((char*)gcode_file[n], &g_code, &f_val, &r_val, &victor);
-
-        switch(g_code){
-            case 0: 
-            case 1: 
-                //process_linear(&pos_q, &speed_q, f_val, &victor, &pos);
-                set_target(victor.x, victor.y, f_val/SPEED_DIV);
-                break;
-            case 2: 
-            case 3: 
-                break;
-            default: 
-                printf("Weird... I thought this would have been caught earlier.\n");
+        printf("Program To Run:\n");
+        while ( strcmp( gcode_file[n], "eof" ) != 0 ) {
+            printf("%s\n", gcode_file[n]); 
+            find_first(gcode_file[n], '\0', &i);
+            acc+=i+1;
+            n++;
+            gcode_file[n]=gf+acc;
         }
+        printf("\n========\n");
 
-        // process queue to get motion
-        // while (!isEmpty(&pos_q)) {
-        //     loop_t = CNT32();
-        //     vector p = removeData(&pos_q);
-        //     set_target(p.x, p.y, f_val/SPEED_DIV);
+        n = 0;
 
-        //     printf("next step = (%f, %f)\n", p.x, p.y);
-        //     waitcnt32(loop_t + time_to_cut*CLKFREQ);
-        // }
+        queue pos_q;
+        queue speed_q;
+        init_q(&pos_q);
+        init_q(&speed_q);
 
+        vector pos0 = {10, 10, 0};
+
+        printf("At starting position (%f, %f)\n", x->pos, y->pos);
+
+        while (strcmp( gcode_file[n], "eof" ) != 0) {
+            // Initializations
+            int g_code = -1;
+            float f_val = 2, r_val = 0;
+            vector victor = { 0, 0, 0 };
+            vector pos = pos0;
+            int cc = -1;
+
+            // Populate Initializations from current GCode command
+            read_line((char*)gcode_file[n], &g_code, &f_val, &r_val, &victor);
+
+            switch(g_code){
+                case 0: 
+                    f_val = F_RAPID;
+                case 1: 
+                    set_target(victor.x, victor.y, f_val/SPEED_DIV);
+                    while(motion_active());
+                    break;
+                case 2: 
+                    cc = 1;
+                case 3: {
+                    process_circular(&pos_q, &victor, &pos, r_val, cc);
+                    while (!isEmpty(&pos_q)) {
+                        vector p = removeData(&pos_q);
+                        set_target(p.x, p.y, f_val/SPEED_DIV);
+                        while(motion_active());
+                        //printf("next step = (%f, %f)\n", p.x, p.y);
+                    }
+                    break;
+                }
+                default: 
+                    printf("Weird... I thought this would have been caught earlier: %d\n", g_code);
+            }
+
+            // process queue to get motion
+
+            //set_target(victor.x, victor.y, f_val/SPEED_DIV);
+            pos0.x = victor.x;
+            pos0.y = victor.y;
+
+            printf("%s\n", gcode_file[n]); 
+            n++;
+
+            
+        }
+        printf("Done\n");
+        while (!reset);
+        reset = 0;
+
+        printf("Reset\n");
+
+        set_target(10, 10, F_RAPID);
         while(motion_active());
-
-        //set_target(victor.x, victor.y, f_val/SPEED_DIV);
-        //pos0.x = victor.x;
-        //pos0.y = victor.y;
-
-        printf("%s\n", gcode_file[n]); 
-        n++;
-
-        
+        set_target(10, 10, 0.1);
     }
-    printf("Done\n");
-
-    while(1);
 }
 
 void __attribute__ ((naked)) mc_entry() {
@@ -197,8 +304,8 @@ void __attribute__ ((naked)) kernel_main() {
     ACT_LED_ON();
 
     start_core(mc_entry, CORE1_ADR);
-    //start_core(iface_entry, CORE2_ADR);
-
+    start_core(iface_entry, CORE2_ADR);
+    waitcnt32(CNT32() + CLKFREQ/10);
     sd_main();
 
 }
