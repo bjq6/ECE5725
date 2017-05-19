@@ -27,6 +27,9 @@ volatile int demo;
 
 #define F_RAPID 2.5
 
+/*
+ * Different commands for the serial interface 
+ */
 enum {
     CMD_NONE = 0,
     CMD_DEMO,
@@ -34,6 +37,9 @@ enum {
     CMD_RESET,
 };
 
+/*
+ * IRQ Interrupt handler
+ */
 IRQ() {
     if (timer->maskedIRQ == 1) { // timer ISR 
         sd_IRQ();
@@ -46,6 +52,9 @@ IRQ() {
     timer->IRQclear = 1;
 }
 
+/*
+ * Hang (alarm) interrupt handler
+ */
 HANG() {
 
     _uart_tx('-');
@@ -64,6 +73,15 @@ HANG() {
     }
 }
 
+/* 
+ * High level initialization function. Does the following: 
+ * 
+ *  1. Sets up GPIO for the LEDs
+ *  2. configures UART interface
+ *  3. Set up the ARM timer to generate a step pulse clock
+ *  4. Enable required interrupts in the interrupt controller
+ *  5. Print "-----------------" to confirm everything is working on the serial consol
+ */
 void _init() {
 
     _disable_irq();
@@ -101,6 +119,9 @@ void _init() {
     printf("\n-----------------\n");
 }
 
+/*
+ * Parse cmd for a proper command. If the command requires a value, it will be stores in *val.
+ */
 uint8_t process_cmd(char *cmd, uint8_t *val) {
     if (cmd[0] != '$') return CMD_NONE;
 
@@ -120,6 +141,13 @@ uint8_t process_cmd(char *cmd, uint8_t *val) {
     }
 }
 
+/* 
+ * Main function for the serial interface. The main loop will:
+ * 
+ *  1. Read in UART characters into a buffer until a '\n' is recieved 
+ *  2. Process the input text
+ *  3. If its a valid command, set the appropriate flag. 
+ */
 void iface_main() {
     printf("Starting Interface Core\n");
 
@@ -156,23 +184,29 @@ void iface_main() {
     }
 }
 
+/*
+ * Main function for the path planner.
+ */
 void mc_main() {
     reset = 0;
     cycle_start = 0;
     demo = 0;
 
+    // wait for stepper driver to be ready
     while(get_sd_state() != SD_READY);
 
     printf("Starting path planner\n");
     axis_t *x = get_x_axis();
     axis_t *y = get_y_axis();
 
+    // move away from (0,0) to avoid getting stuck on the axis (this later should be implemented as a G54 command to set an origin offset)
     set_target(10, 10, F_RAPID/SPEED_DIV);
     while(motion_active());
     set_target(10, 10, 0.1);
 
     while(1) {
-            
+        
+        // check which demo program is selected
         char *gf = gdemo1; 
         do {
             while (!cycle_start);
@@ -206,6 +240,7 @@ void mc_main() {
         int acc=0;
         gcode_file[0] = gf;
 
+        // parse the GCode file into lines
         printf("Program To Run:\n");
         while ( strcmp( gcode_file[n], "eof" ) != 0 ) {
             printf("%s\n", gcode_file[n]); 
@@ -227,6 +262,7 @@ void mc_main() {
 
         printf("At starting position (%f, %f)\n", x->pos, y->pos);
 
+        // loop through the gcode program line by line
         while (strcmp( gcode_file[n], "eof" ) != 0) {
             // Initializations
             int g_code = -1;
@@ -238,6 +274,10 @@ void mc_main() {
             // Populate Initializations from current GCode command
             read_line((char*)gcode_file[n], &g_code, &f_val, &r_val, &victor);
 
+            // Main GCode switch
+            // 0, 1 are linear motion 
+            // 2 is clockwise motion,
+            // 3 is counter clockwise motion
             switch(g_code){
                 case 0: 
                     f_val = F_RAPID;
@@ -261,9 +301,6 @@ void mc_main() {
                     printf("Weird... I thought this would have been caught earlier: %d\n", g_code);
             }
 
-            // process queue to get motion
-
-            //set_target(victor.x, victor.y, f_val/SPEED_DIV);
             pos0.x = victor.x;
             pos0.y = victor.y;
 
@@ -284,13 +321,22 @@ void mc_main() {
     }
 }
 
+/*
+ * naked entry function for the path planner. These functions must be "naked" because 
+ * so that the compiler doesn't try using the stack to push registers before the stack is setup.
+ */ 
 void __attribute__ ((naked)) mc_entry() {
+    // initialize the stack
     _init_sp((unsigned int *)CORE1_STACK);
+    // initialize the core
     _init_core();
 
     mc_main();
 }
 
+/*
+ * Naked entry function for the serial interface
+ */
 void __attribute__ ((naked)) iface_entry() {
     _init_sp((unsigned int *)CORE2_STACK);
     _init_core();
@@ -298,14 +344,20 @@ void __attribute__ ((naked)) iface_entry() {
     iface_main();
 }
 
+/*
+ * naked main function. called from the assembly startup code
+ */
 void __attribute__ ((naked)) kernel_main() {
     _init();
 
     ACT_LED_ON();
 
+    // start the secondary cores to run their entry functions
     start_core(mc_entry, CORE1_ADR);
     start_core(iface_entry, CORE2_ADR);
     waitcnt32(CNT32() + CLKFREQ/10);
+
+    // core 0 will run the main stepper driver function
     sd_main();
 
 }
