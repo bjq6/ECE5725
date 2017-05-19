@@ -60,7 +60,7 @@
                         <a href="conc-future.html#future">Future</a>
                     </li>
                     <li>
-                        <a href="code.html">Code</a>
+                        <a href="index.html#code">Code</a>
                     </li>
                     <li>
                         <a href="index.html#contact">Contact</a>
@@ -84,19 +84,58 @@
     <!-- Page Content -->
     <div class="container">
 
-        <br>
-         
-        <hr class="featurette-divider" id="results">
+        <br> <br>
 
         <div class="featurette">
-            <h2 class="featurette-heading">Results
-                <span class="text-muted"></span>
-            </h2>
-            <p class="lead">As a result of the system design and </p>
+            <img class="featurette-image img-rounded img-responsive" src="img/results.jpg">
+            <h4 style="text-align: center;">Project Group Picture</h4>
+            <hr class="featurette-divider" id="results">
+            <p class="lead">As a result of the system design, the team was able to develop a functional CNC controller capable of: </p>
+
+            <ul>
+                <li>accepting and parsing GCode paths</li>
+                <li>controlling an arbitrary CNC machine </li>
+                <li>using closed feedback control loops.</li>
+                <li>running on a bare metal environment on the RaspberryPi module.</li>
+            </ul>
+
+            <p class="lead">The controller currently requires the use of the <a href="http://www.mouser.com/ProductDetail/ams/AS5161-HSOM/?qs=eSfX1CQlHqoyh4aE0tXN%2FA%3D%3D">AS5161 encoders</a>, coupled with <a href="https://www.kjmagnetics.com/proddetail.asp?prod=D82DIA">diametric magnets</a> on the motor's shaft. However the system was designed modularly such that as long as position feedback was given, the system would be able to do precise position control with arbitrary motors.</p>
         </div>
 
-        <hr class="featurette-divider">
+        <div class="featurette">
+            <br>
+            <div class="col-md-6">
+                <img class="featurette-image img-rounded img-responsive" src="img/expected.png">
+                <h4>Expected Result, simulated <a href="https://nraynaud.github.io/webgcode/">here</a></h4>
+            </div>
+            <div class="col-md-6">
+                <img class="featurette-image img-rounded img-responsive" src="img/actual.png">
+                <h4>Actual Result</h4>
+            </div>
+            <br>
+            <p class="lead">As shown above, the CNC was able to follow the path constructed by the following GCode.</p>
+            <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">G0 X10 Y10
 
+G1 X35 Y10
+G1 X10 Y10
+G1 X10 Y35
+G1 X35 Y35
+G1 X10 Y35
+G1 X10 Y60
+G1 X70 Y60
+G3 X70 Y10 R25
+G1 X105 Y10
+G1 X80 Y10
+G1 X80 Y35
+G1 X105 Y35
+G1 X80 Y35
+G1 X80 Y60
+G1 X105 Y60
+</pre></div>
+        </div>
+
+
+        <hr class="featurette-divider">
 
         <!-- Footer -->
         <footer>

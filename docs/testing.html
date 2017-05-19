@@ -60,7 +60,7 @@
                         <a href="conc-future.html#future">Future</a>
                     </li>
                     <li>
-                        <a href="code.html">Code</a>
+                        <a href="index.html#code">Code</a>
                     </li>
                     <li>
                         <a href="index.html#contact">Contact</a>
@@ -102,7 +102,11 @@
 
             <h3>Issues</h3>
 
-            <p class="lead">Since half of the code for startup is written in assembly, every new feature presented a new set of difficult-to-find bugs. These included using hardware floating points, initializing interrupt handlers, and running multiple cores. Most of these issues were addressed through large print statements to occasionally dump register values, blinking LEDs when expected behavior occured, and feverishly searching the RaspberryPi Bare Metal forums and GitHub for examples of working code that accomplished the same goal as was desired. </p>            
+            <p class="lead">Since half of the code for startup is written in assembly, every new feature presented a new set of difficult-to-find bugs. These included using hardware floating points, initializing interrupt handlers, and running multiple cores. Most of these issues were addressed through large print statements to occasionally dump register values, blinking LEDs when expected behavior occured, and feverishly searching the RaspberryPi Bare Metal forums and GitHub for examples of working code that accomplished the same goal as was desired. </p>  
+
+            <h2>Path Planning</h2>
+            <p class="lead">Path planning was developed piecewise to ensure that each part worked in step. GCode parsing was developed as a switch case statement. This made it rather easy to test parsing piecewise as it would fall into given cases and can be handled selectively. It generally worked as expected here.</p>
+            <p class="lead">Interpolation had the first main issue that needed to be worked out. As planning was developed before the bare metal environment was fully set up, floating point mathematics still took a long time. To get around this, the parser was developed to return <tt>int</tt>s which were not as computationally expensive. As floating point math is traditionally a problem with microcontrollers, the team used a function from the <a href="https://github.com/gnea/grbl">grbl</a> codebase, <tt>read_float</tt> to extract numbers from strings for integer math.</p>              
 
             <h2>Motion Control Testing</h2>
             <p class="lead">Motion control was developed with incremental testing as new features were added. Each of the major milestones were: </p>

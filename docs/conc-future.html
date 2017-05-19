@@ -60,7 +60,7 @@
                         <a href="conc-future.html#future">Future</a>
                     </li>
                     <li>
-                        <a href="code.html">Code</a>
+                        <a href="index.html#code">Code</a>
                     </li>
                     <li>
                         <a href="index.html#contact">Contact</a>
@@ -76,7 +76,7 @@
     <header class="header-image">
         <div class="headline">
             <div class="container">
-                <h1>Design</h1>
+                <h1>Conclusion, Future Work</h1>
             </div>
         </div>
     </header>
@@ -92,7 +92,8 @@
             <h2 class="featurette-heading">Conclusion
                 <span class="text-muted"></span>
             </h2>
-            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+            <p class="lead">The team was able to finish the core of the project that they wanted to build. The final controller was able to accept GCode paths, move the head to very precise locations in closed feedback control and was modular for interchangability, all in a baremetal environment.</p>
+            <p class="lead">There were some additional parts that the team wanted to implement but were not able to either from time or part availability constraints, discussed in Future Works.</p>
         </div>
 
         <hr class="featurette-divider" id="future">
@@ -103,7 +104,15 @@
             <h2 class="featurette-heading">Future Work
                 <span class="text-muted"></span>
             </h2>
-            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+            <p class="lead">As a complete CNC controller is more to build than could possibly be implemented in one semester, the team would most likely continue developing the controller for more functionality. These include: </p>
+            <ul>
+                <li>accepting GCode paths over UART</li>
+                <li>MCodes for motor/spindle/laser control</li>
+                <li>manual stepper motor jogging over command line </li>
+                <li>graphical user interface</li>
+            </ul>
+
+            <p class="lead">Additionally, there were some issues that were nevery fully worked out in the interest of time. Therefore, it would be useful to debug some issues, such as GPIO access from cores other than core 0 in order to reduce latency. </p>
         </div>
 
 
