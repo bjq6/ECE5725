@@ -7,18 +7,27 @@
 #define SD_T_STEP 			16
 #define MOTION_EPS			0.1
 
+/*
+ * Stepper Driver states
+ */
 enum {
 	SD_NOTREADY = 0,
 	SD_READY,
 	SD_HOMING
 };
 
+/*
+ * Axis IDs
+ */
 enum {
 	X_AXIS = 0,
 	Y_AXIS,
 	Z_AXIS
 };
 
+/*
+ * PID state variable structure type
+ */
 typedef struct {
 	float e; 		// error
 	float de;		// de/dt
@@ -29,6 +38,9 @@ typedef struct {
 	float Kd;	// d gain
 } pid_control_t;
 
+/* 
+ * Encoder values structure type
+ */
 typedef struct {
 	float a; 		// angle (relative)
 	float a_abs;	// angle (absolute)
@@ -44,6 +56,9 @@ typedef struct {
 
 } encoder_t;
 
+/* 
+ * Axis values structure type
+ */
 typedef struct {
 	encoder_t enc;
 	
@@ -84,23 +99,16 @@ typedef struct {
 
 } axis_t;
 
-// getters
 axis_t* get_x_axis();
 axis_t* get_y_axis();
 axis_t* get_z_axis();
 uint32_t get_sd_state();
-
 uint32_t motion_active();
-
-// setters
 void set_target_axis(axis_t *a, float t, float v_inv);
 void set_target(float x, float y, float f);
-
 void sd_IRQ();
-
 void step(axis_t *a);
 void set_dir(axis_t *a, uint8_t dir);
-
 void read_enc(axis_t *a);
 void update_pid(axis_t *a);
 void run_homing(axis_t *a);

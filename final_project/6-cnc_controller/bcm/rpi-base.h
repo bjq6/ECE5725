@@ -6,7 +6,7 @@
 #define PERIPHERAL_BASE     0x3F000000UL
 
 /*
- * Function from Assembly 
+ * Functions from Assembly 
  */
 typedef volatile uint32_t rpi_reg_rw_t;
 typedef volatile const uint32_t rpi_reg_ro_t;
