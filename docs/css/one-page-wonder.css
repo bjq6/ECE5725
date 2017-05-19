@@ -8,6 +8,10 @@ body {
     margin-top: 50px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
 }
 
+li {
+    font-size: 18px;
+}
+
 .center-block{
     margin=auto;
 }
@@ -21,7 +25,7 @@ body {
     display: block;
     width: 100%;
     text-align: center;
-    background: url('../img/cnc-wood.jpg') no-repeat center center scroll;
+    background: url('https://static.pexels.com/photos/301394/pexels-photo-301394.jpeg') no-repeat center center scroll;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -35,13 +39,15 @@ body {
 .headline h1 {
     font-size: 130px;
     color: #fff;
+    stroke: 1px;
+    stroke-color: #000;
     /*background: #fff;
     background: rgba(255,255,255,0.9);*/
 }
 
 .headline h2 {
-    font-size: 77px;
-    color: #eee;
+    font-size: 40px;
+    color: #fff;
     /*background: #fff;
     background: rgba(255,255,255,0.9);*/
 }
@@ -51,7 +57,7 @@ body {
 }
 
 .featurette-divider {
-    margin: 80px 0;
+    margin: 40px 0;
 }
 
 .featurette {
@@ -80,7 +86,7 @@ footer {
     }
 
     .headline h2 {
-        font-size: 63px;
+        font-size: 36px;
     }
 
     .featurette-divider {
@@ -106,7 +112,7 @@ footer {
     }
 
     .headline h2 {
-        font-size: 50px;
+        font-size: 32px;
     }
 
     .featurette-divider {
@@ -150,7 +156,7 @@ footer {
     }
 
     .headline h2 {
-        font-size: 32px;
+        font-size: 26px;
     }
 
     .featurette-divider {
@@ -168,13 +174,13 @@ footer {
     }
 
     .headline h2 {
-        font-size: 30px;
+        font-size: 22px;
     }
 }
 
 @media(max-width:375px) {
     .featurette-divider {
-        margin: 10px 0;
+        margin: 5px 0;
     }
 
     .featurette-image {
@@ -190,4 +196,19 @@ footer {
         margin-bottom: 10px;
         margin-left: 0;
     }
+}
+
+.img-rounded{
+    border-radius: 6px;
+    width: 80%;
+    margin: auto;
+}
+.strokeme
+{
+    color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;  
 }
