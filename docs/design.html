@@ -12,10 +12,17 @@
     <title>CNC Project</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link href="css/one-page-wonder.css" rel="stylesheet">
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    </script>
+    <script type="text/javascript" async
+      src="https://example.com/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -94,7 +101,13 @@
                 <span class="text-muted"></span>
             </h2>
             <h2 class="featurette-subheading">RaspberryPi Bare Metal</h2>
-            <p class="lead">One of the big challenges of this project was programming the Raspberry Pi in bare metal, that is, without any operating system. This involved writing some simple startup code and a small library to interface with the processor's peripherals (such as the NEON VFP, timers, interrupts, UART controller, and GPIO). This was a rather involved process, so it will be broken down step by step. Most of this information was gathered from the <a href="http://www.valvers.com/open-software/raspberry-pi/step01-bare-metal-programming-in-cpt1/">Valvers tutorials on bare metal programming</a> and <a href="https://github.com/dwelch67/raspberrypi">David Welch's GitHub</a>. The two approach this problem in different ways and we mixed the two approaches to develop a solution that worked for this project. Additionally, we regularly referenced the ARMv7 Technical Reference Manual (requires a quick and free NDA from ARM by registering on their website, so a link cannot be provided) and the BCM2835 Peripheral Manual, which describes the features of the processor outside of the ARM Core.</p>
+            <div class="row">
+                <div class="col-md-8">
+                <p class="lead">One of the big challenges of this project was programming the Raspberry Pi in bare metal, that is, without any operating system. This involved writing some simple startup code and a small library to interface with the processor's peripherals (such as the NEON VFP, timers, interrupts, UART controller, and GPIO). This was a rather involved process, so it will be broken down step by step. Most of this information was gathered from the <a href="http://www.valvers.com/open-software/raspberry-pi/step01-bare-metal-programming-in-cpt1/">Valvers tutorials on bare metal programming</a> and <a href="https://github.com/dwelch67/raspberrypi">David Welch's GitHub</a>. The two approach this problem in different ways and we mixed the two approaches to develop a solution that worked for this project. Additionally, we regularly referenced the ARMv7 Technical Reference Manual (requires a quick and free NDA from ARM by registering on their website, so a link cannot be provided) and the BCM2835 Peripheral Manual, which describes the features of the processor outside of the ARM Core.</p></div>
+                <div class="col-md-4"> <img class="featurette-image img-rounded img-responsive smaller" src="img/pi.jpg"></div>
+            </div>
+            
+            
             <h2 class="featurette-subheading">Startup and Initialization</h2>
             <p class="lead">The Raspberry Pi boots by starting the GPU, which loads the <tt>start.elf</tt> into the ARM processor, triggers a reset on the ARM processor, and begins running the <tt>kernel.img</tt>. The <tt>kernel.img</tt> is the actual program. </p>
             <p class="lead">The RPi's ARM processor requires the start of the program to be at address memory 0x8000. As with any C program, the gcc linker looks for the <tt>_start</tt> section and makes that the start of the program. The linker handles and memory map file handle placing the <tt>_start</tt> section at the proper memory address. The program begins in the <tt>vector.s</tt> assembly program. Here you will find the <tt>_start</tt> label. This code does the following:</p>
@@ -123,20 +136,27 @@
 
 
             <h2 class="featurette-subheading">Encoders</h2>
-            <p class="lead">To close the control loop, some method of feedback is needed. The AS5161 encoders, coupled with diametric magnets on the motor's shaft, measure the absolute angle of the motor shaft relative to the encoder IC. The IC outputs a PWM signal who's pulse width is proportional to the angle. This pulse width is measured and the angle is calculated. A simple overflow/underflow detection measures when a complete revolution has happened. This angle is stored globally for the PID loop to access.</p>
+            <p class="lead">To close the control loop, some method of feedback is needed. The
+            <a href="http://www.mouser.com/ProductDetail/ams/AS5161-HSOM/?qs=eSfX1CQlHqoyh4aE0tXN%2FA%3D%3D">AS5161 encoders</a>, coupled with <a href="https://www.kjmagnetics.com/proddetail.asp?prod=D82DIA">diametric magnets</a> on the motor's shaft, measure the absolute angle of the motor shaft relative to the encoder IC. The IC outputs a PWM signal who's pulse width is proportional to the angle. This pulse width is measured and the angle is calculated. A simple overflow/underflow detection measures when a complete revolution has happened. This angle is stored globally for the PID loop to access.</p>
 
+
+            <!-- EDITABLE PID diagram here: https://drive.google.com/a/cornell.edu/file/d/0B2OAbosKKjETUHBTSC10OTYxdGc/view?usp=sharing -->
             <h2 class="featurette-subheading">PID Control</h2>
+            <img class="featurette-image img-rounded img-responsive" src="img/pid.png">
+            <h4 style="text-align: center;">PID Control Loop</h4>
             <p class="lead">Due to the design of the motor controller, precise position control is not available, but precise speed control is. So, a PID loop was developed to control the position of the motor. The PID loop works be measuring the error between the desired position and the current position, then setting the speed of the motor to be the sum of three terms: proportional to error (P), proportional to the integral of the error (I), and proportional to the derivative of the error (D). This forms a second order system which can provide fast response to disturbances (such as external on the motor) and allows the motor to quickly move to the desired location. A second layer of control is added by limiting the maximum speed of the motor. It is safe to assume that the motor will always hit this limit because the error is always very large when changing the target position of the stage. As a result, the motors can be set to move to a target position at a given speed. By stringing a series of motion target commands together, the stage will move along a path with a constant feedrate. </p>
 
 
             <h2 class="featurette-subheading">Path Planning</h2>
-            <p class="lead"></p>      
+            <p class="lead">Similar to other CNC machines, paths would be created from GCode commands. GCode is able to provide the coarse paths that would be made mathematically, then the tool would interpolate positions to drive the motors to in discrete steps that are possible to achieve.</p>
+            <p class="lead">The CNC controller handled GCode parsing to create discrete paths. The parser was able to handle the following motion commands: </p>        
             <table class="table table-bordered">
                 <thead>
                   <tr class="danger">
                     <th>GCode</th>
                     <th>Name</th>
                     <th>Description</th>
+                    <th>Inputs</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -144,26 +164,46 @@
                     <td>G00</td>
                     <td>Rapid Positioning</td>
                     <td>Move each axis at its max speed until it reaches the positionit was trying to reach.  Traditionally used to move the bit to astarting location or ending location.</td>
+                    <td>Destination X, Y, Z</td>
                   </tr>
                   <tr>
                     <td>G01</td>
                     <td>Linear Interpolation </td>
                     <td>Move the tool from the current location to the given location in a linear path between the points by interpolating steps between the positions.</td>
+                    <td>Destination X, Y, Z, Feedrate</td>
                   </tr>
                   <tr>
                     <td>G02</td>
                     <td>Circular Interpolation, Clockwise</td>
                     <td>Move the tool from the current location to the given location in a clockwise arc from another given center point by interpolating steps along the arc.</td>
+                    <td>Destination X, Y, Z, Feedrate, Radius</td>
                   </tr>
                   <tr>
                     <td>G03</td>
                     <td>Circular Interpolation, Counterclockwise</td>
                     <td>Move the tool from the current location to the given location in a counterclockwise arc from another given center point by interpolating steps along the arc.</td>
+                    <td>Destination X, Y, Z, Feedrate, Radius</td>
                   </tr>
                 </tbody>
             </table>
-            <p class="lead"></p>
+            <p class="lead">Paths were interpolated from math by taking discrete points on the line of equal length. These points are then pushed to a queue for the motor controller to use as setpoints for the PID control. The points were given by the following formulas:</p>
 
+            <br>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <img class="featurette-image img-rounded img-responsive vcenter" src="img/linear.png">
+                    <h4>Linear Interpolation for GCode G00, G01</h4>
+                </div>
+                <div class="col-md-4">
+                    <img class="featurette-image img-rounded img-responsive vcenter" src="img/circular.png">
+                    <h4>Circular Interpolation for GCode G02, G03</h4>
+                </div>
+                <div class="col-md-4">
+                    <img class="featurette-image img-rounded img-responsive vcenter" src="img/radial.png">
+                    <h4>Circular Interpolation Graphic</h4>
+                </div>
+            </div>
 
 
             <h2 class="featurette-subheading">User Interface</h2>

@@ -224,3 +224,11 @@ footer {
     -1px 1px 0 #000,
     1px 1px 0 #000;  
 }
+.smaller{
+    width: 240px;
+}
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
