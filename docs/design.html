@@ -93,7 +93,7 @@
             <h2 class="featurette-heading">Design and Initialization
                 <span class="text-muted"></span>
             </h2>
-            <h2>RasberryPi Bare Metal</h2>
+            <h2 class="featurette-subheading">RaspberryPi Bare Metal</h2>
             <p class="lead">One of the big challenges of this project was programming the Raspberry Pi in bare metal, that is, without any operating system. This involved writing some simple startup code and a small library to interface with the processor's peripherals (such as the NEON VFP, timers, interrupts, UART controller, and GPIO). This was a rather involved process, so it will be broken down step by step. Most of this information was gathered from the <a href="http://www.valvers.com/open-software/raspberry-pi/step01-bare-metal-programming-in-cpt1/">Valvers tutorials on bare metal programming</a> and <a href="https://github.com/dwelch67/raspberrypi">David Welch's GitHub</a>. The two approach this problem in different ways and we mixed the two approaches to develop a solution that worked for this project. Additionally, we regularly referenced the ARMv7 Technical Reference Manual (requires a quick and free NDA from ARM by registering on their website, so a link cannot be provided) and the BCM2835 Peripheral Manual, which describes the features of the processor outside of the ARM Core.</p>
             <h2 class="featurette-subheading">Startup and Initialization</h2>
             <p class="lead">The Raspberry Pi boots by starting the GPU, which loads the <tt>start.elf</tt> into the ARM processor, triggers a reset on the ARM processor, and begins running the <tt>kernel.img</tt>. The <tt>kernel.img</tt> is the actual program. </p>
