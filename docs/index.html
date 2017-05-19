@@ -45,22 +45,19 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="#design ">Design</a>
+                        <a href="#design+testing">Design and Testing</a>
                     </li>
                     <li>
-                        <a href="#testing ">Testing</a>
+                        <a href="#results">Results</a>
                     </li>
                     <li>
-                        <a href="#drawings ">Drawings</a>
+                        <a href="#conclusion">Conclusion</a>
                     </li>
                     <li>
-                        <a href="#results ">Results</a>
+                        <a href="#future">Future</a>
                     </li>
                     <li>
-                        <a href="#conclusion ">Conclusion</a>
-                    </li>
-                    <li>
-                        <a href="#code ">Code</a>
+                        <a href="#code">Code</a>
                     </li>
                     <li>
                         <a href="#contact">Contact</a>
@@ -116,15 +113,13 @@
             <p class="lead">We built a CNC controller in bare metal capapble of reading in a GCode file, interpolating motor positions, and setting the motors to move a spindle to those positions in a closed feedback loop. In order to accomplish this in a bare metal environment, the RaspberryPi needed to be configured to setup the parts of the processor's peripherals that would be needed - timers, interrupts, UART controller, GPIOs, etc. Once configured, then the team was able to start building out modules to handle path planning and stepper motor control.</p>
         </div>
 
-        <hr class="featurette-divider" id="design">
+        <hr class="featurette-divider" id="design+testing">
 
         <div class="featurette">
-            <h2 class="featurette-heading">Design and Initialization
-                <span class="text-muted"></span>
-            </h2>
-            <h2>RasberryPi Bare Metal</h2>
+            <h2 class="featurette-heading">Design, Initialization, and Testing</h2>
+            <h2 class="featurette-subheading">RasberryPi Bare Metal</h2>
             <p class="lead">One of the big challenges of this project was programming the Raspberry Pi in bare metal, that is, without any operating system. This involved writing some simple startup code and a small library to interface with the processor's peripherals (such as the NEON VFP, timers, interrupts, UART controller, and GPIO). This was a rather involved process, so it will be broken down step by step. Most of this information was gathered from the <a href="http://www.valvers.com/open-software/raspberry-pi/step01-bare-metal-programming-in-cpt1/">Valvers tutorials on bare metal programming</a> and <a href="https://github.com/dwelch67/raspberrypi">David Welch's GitHub</a>. The two approach this problem in different ways and we mixed the two approached to develop a solution that worked for this project.</p>
-            <h3>Startup and Initialization</h3>
+            <h2 class="featurette-subheading">Startup and Initialization</h2>
             <p class="lead">The Raspberry Pi boots by starting the GPU, which loads the <tt>start.elf</tt> into the ARM processor, triggers a reset on the ARM processor, and begins running the <tt>kernel.img</tt>. The <tt>kernel.img</tt> is the actual program. </p>
             <p class="lead">The RPi's ARM processor requires the start of the program to be at address memory 0x8000. As with any C program, the gcc linker looks for the <tt>_start</tt> section and makes that the start of the program. The linker handles and memory map file handle placing the <tt>_start</tt> section at the proper memory address. The program begins in the <tt>vector.s</tt> assembly program. Here you will find the <tt>_start</tt> label. This code does the following:</p>
             <ol>
@@ -136,28 +131,28 @@
             <p class="lead">The very first thing the program does is set up the Interrupt Vector Table (IVT). Whenever the processor generates an exception (an interrupt), it will look up where the interrupt handler is stored in the IVT. After a reset, the reset exception is generated, so a reset handler is defined which contains all of the startup code. The handler calls an initialization function(<tt>_init_core</tt>), then calls the C function <tt>kernel_main</tt>, which is the actual code for the program. The rest of the assembly program defines convenience functions for interacting with registers, enabling/disabling the IRQ handler, and the IRQ handler itself. </p>
             <p class="lead">Once the main kernel function is called by the startup code, it runs a higher level initialization function to turn on other peripherals, such as the UART and ARM Timer. At this point, code is application specific and not necessarily required for the processor to run. </p>
             
-            <h3>Multicore</h3>
+            <h2 class="featurette-subheading">Multicore</h2>
             <p class="lead">The Raspberry Pi 3 has 4 cores that can run in parallel. After a reset, core 0 runs the code while cores 1-3 wait for a signal from core 0 to start running. This signal comes in the form of writing the address of the function the core should run to a specific address that each secondary core will be checking.</p>
             <p class="lead">One of the issues discovered is that GPIO does not play well with multicore. So only core 0 can interface with GPIO and the other cores can only perform computation. This issue was not explored further in the interest of time and project completion.</p>
 
-            <h3>C Standard Library</h3>
+            <h2 class="featurette-subheading">C Standard Library</h2>
             <p class="lead">One useful feature is the ability to link the C Standard Library. This features math functions, string manipulation functions, and string formatting (<tt>printf()</tt>). This requires that standard Linux system calls be implemented (accomplished in <tt>syscalls.c</tt>). Most of the functions can be trivially implemented to return 0. The one interesting function is the <tt>_write()</tt> function, which is used by <tt>printf()</tt> to display the characters in the formatted string. The function is implemented by writing the desired string to the UART interface (which must be initialized before any printing calls are made). This allows the <tt>printf()</tt> function to be used for serial debugging. </p>
 
-            <h2>Motion Control</h2>
+            <h2 class="featurette-subheading">Motion Control</h2>
             <p class="lead">The CNC controller is designed to interface with step/direction stepper motors and AS5161 absolute magnetic encoders to create closed loop feedback control of the stage's position. This breaks down into three parts: sending step/direction pulses, reading encoders, and performing PID calculations. This process is performed for each axis independently. </p>
 
-            <h3>Stepper Motor Control</h3>
+            <h2 class="featurette-subheading">Stepper Motor Control</h2>
             <p class="lead">A typical stepper motor is controlled with two signals: step and direction. The value of "direction" sets the direction of rotation--clockwise or counterclockwise. On each rising edge of the "step" signal, the motor will "step" to its next position. Typically, each step is 1.8&deg. When step signals are sent in quick succession, the rotation of the motor will appear smooth. </p>
             <p class="lead">The step signal is generated using the ARM timer and interrupts. The timer is set to trigger an interrupt every 16 microseconds. This established the step clock that the step signal will be synchronized to. A global variable sets the number of these step clock pulses between each step pulse. The speed of rotation is proportional to the inverse of this number. This is the parameter used to control the motor's speed (which can be set to 0 to stop the motor). The sign of this number is used to set the direction of rotation.</p>
 
 
-            <h3>Encoders</h3>
+            <h2 class="featurette-subheading">Encoders</h2>
             <p class="lead">To close the control loop, some method of feedback is needed. The AS5161 encoders, coupled with diametric magnets on the motor's shaft, measure the absolute angle of the motor shaft relative to the encoder IC. The IC outputs a PWM signal who's pulse width is proportional to the angle. This pulse width is measured and the angle is calculated. A simple overflow/underflow detection measures when a complete revolution has happened. This angle is stored globally for the PID loop to access.</p>
 
-            <h3>PID Control</h3>
+            <h2 class="featurette-subheading">PID Control</h2>
             <p class="lead">Due to the design of the motor controller, precise position control is not available, but precise speed control is. So, a PID loop was developed to control the position of the motor. The PID loop works be measuring the error between the desired position and the current position, then setting the speed of the motor to be the sum of three terms: proportional to error (P), proportional to the integral of the error (I), and proportional to the derivative of the error (D). This forms a second order system which can provide fast response to disturbances (such as external on the motor) and allows the motor to quickly move to the desired location. A second layer of control is added by limiting the maximum speed of the motor. It is safe to assume that the motor will always hit this limit because the error is always very large when changing the target position of the stage. As a result, the motors can be set to move to a target position at a given speed. By stringing a series of motion target commands together, the stage will move along a path with a constant feedrate. </p>
 
-            <h3>Path Planning</h3>
+            <h2 class="featurette-subheading">Path Planning</h2>
             <p class="lead"></p>      
             <table class="table table-bordered">
                 <thead>
@@ -193,7 +188,7 @@
             <p class="lead"></p>
 
 
-            <h3>User Interface</h3>
+            <h2 class="featurette-subheading">User Interface</h2>
             <p class="lead">The user interface is a simple serial text console. It currently features three commands: Cycle start, reset, and demo selection. Cycle start will begin running the loaded GCode program. Reset will move the CNC back to its home position and wait for a cycle start command. The demo selection allows the user to load one of the three demo programs pre-loaded onto the machine. Currently, there is no functionality to load GCode programs over serial, but this feature is trivially implemented. </p>
             <p class="lead">A command is sent over the serial console as a string with the following format: <tt>$[command]&ltvalues&gt</tt>. The <tt>command</tt> field is a character corresponding to the desired command. The <tt>values</tt> field is an option string of data as required by the command specified. The following table shows the commands available:</p>
             <table class="table table-bordered">
@@ -239,17 +234,6 @@
             <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
         </div>
 
-        <hr class="featurette-divider" id="drawings">
-
-        <!-- Third Featurette -->
-        <div class="featurette">
-            <img class="featurette-image img-circle img-responsive pull-right" src="http://placehold.it/500x500">
-            <h2 class="featurette-heading">Drawings
-                <span class="text-muted"></span>
-            </h2>
-            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
-        </div>
-
         <hr class="featurette-divider" id="results">
 
         <div class="featurette">
@@ -263,6 +247,17 @@
 
         <div class="featurette">
             <h2 class="featurette-heading">Conclusion
+                <span class="text-muted"></span>
+            </h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+
+        <hr class="featurette-divider" id="future">
+
+        <!-- Third Featurette -->
+        <div class="featurette">
+            <img class="featurette-image img-circle img-responsive pull-right" src="http://placehold.it/500x500">
+            <h2 class="featurette-heading">Future Work
                 <span class="text-muted"></span>
             </h2>
             <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>

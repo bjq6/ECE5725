@@ -75,6 +75,9 @@ li {
 .featurette-heading {
     font-size: 50px;
 }
+.featurette-heading {
+    font-size: 40px;
+}
 
 footer {
     margin: 50px 0;
@@ -103,6 +106,9 @@ footer {
 
     .featurette-heading {
         font-size: 35px;
+    }
+    .featurette-subheading {
+        font-size: 30px;
     }
 }
 
@@ -134,6 +140,9 @@ footer {
     .featurette-heading {
         font-size: 30px;
     }
+    .featurette-subheading {
+        font-size: 25px;
+    }
 }
 
 @media(max-width:768px) {
@@ -147,6 +156,9 @@ footer {
 
     .featurette-heading {
         font-size: 25px;
+    }
+    .featurette-subheading {
+        font-size: 20px;
     }
 }
 
