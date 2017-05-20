@@ -118,10 +118,23 @@
                 <li>Call the C main function <tt>kernel_main</tt></li>
             </ol>
 
-            <img class="img-responsive vcenter pull-right" src="img/arm_startup.png" width="50%" height="50%">
             
-            <p class="lead">The very first thing the program does is set up the Interrupt Vector Table (IVT). Whenever the processor generates an exception (an interrupt), it will look up where the interrupt handler is stored in the IVT. After a reset, the reset exception is generated, so a reset handler is defined which contains all of the startup code. The handler calls an initialization function(<tt>_init_core</tt>), then calls the C function <tt>kernel_main</tt>, which is the actual code for the program. The rest of the assembly program defines convenience functions for interacting with registers, enabling/disabling the IRQ handler, and the IRQ handler itself. </p>
+            
+            <div class="row">
+                
+                <div class="col-md-6"><p class="lead">The very first thing the program does is set up the Interrupt Vector Table (IVT). Whenever the processor generates an exception (an interrupt), it will look up where the interrupt handler is stored in the IVT. After a reset, the reset exception is generated, so a reset handler is defined which contains all of the startup code. The handler calls an initialization function(<tt>_init_core</tt>), then calls the C function <tt>kernel_main</tt>, which is the actual code for the program. The rest of the assembly program defines convenience functions for interacting with registers, enabling/disabling the IRQ handler, and the IRQ handler itself. </p>
+                </div>
+
+                <br>
+                <div class="col-md-6">
+                    <img class="img-responsive vcenter" src="img/arm_startup.png" width="95%"> 
+                </div>
+                <br>
+
+            </div>
+            
             <p class="lead">Once the main kernel function is called by the startup code, it runs a higher level initialization function to turn on other peripherals, such as the UART and ARM Timer. At this point, code is application specific and not necessarily required for the processor to run. </p>
+            
             
             <h2 class="featurette-subheading">Multicore</h2>
             <p class="lead">The Raspberry Pi 3 has 4 cores that can run in parallel. After a reset, core 0 runs the code while cores 1-3 wait for a signal from core 0 to start running. This signal comes in the form of writing the address of the function the core should run to a specific address that each secondary core will be checking.</p>
@@ -246,11 +259,28 @@
 
             <h2 class="featurette-subheading">Circuits and Hardware</h2>
 
-            <img class="img-responsive vcenter pull-left" src="img/circuit_block.png" width="25%" height="25%" hspace="20">
-            <p class="lead">The controller was build with a few pieces of hardware. To th left is a block diagram of the electrical connections within the controller. All that is needed are the stepper motors and encoder for each axis, a limit switch for each axis, and a UART to USB adapter, such as the ones made by FTDI.</p>
+            <br>
+
+            <p class="lead">The controller was build with a few pieces of hardware. To the left is a block diagram of the electrical connections within the controller. All that is needed are the stepper motors and encoder for each axis, a limit switch for each axis, and a UART to USB adapter, such as the ones made by FTDI.</p>
+
+            <br>
+
+            <div class="row">
+                <div class="col-md-5"> 
+                    <img class="img-responsive" style="margin: auto;" src="img/circuit_block.png"><br>
+                    <h4 style="text-align: center;">Block Diagram</h4>
+                </div>
+                <div class="col-md-7">
+                    <img class="img-responsive" src="img/electronics.jpg"><br>
+                    <h4 style="text-align: center;">Electronics on CNC Machine</h4>
+                </div>
+            </div>
+
+            <br><br>
 
             <p class="lead">All of the circuits were implemented on a breadboard, but could easily be designed onto a custom PCB shield for the RaspberryPi using EAGLE CAD or Altium. </p>
-            <img class="img-responsive pull-right" src="img/electronics.jpg" width="40%" height="40%" hspace="20">
+
+            
         </div>
 
         <hr class="featurette-divider">
