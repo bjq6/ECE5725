@@ -211,7 +211,7 @@
 
             <h2 class="featurette-subheading">User Interface</h2>
 
-            <p class="lead">The user interface is a simple serial text console. It currently features three commands: Cycle start, reset, and demo selection. Cycle start will begin running the loaded GCode program. Reset will move the CNC back to its home position and wait for a cycle start command. The demo selection allows the user to load one of the three demo programs pre-loaded onto the machine. Currently, there is no functionality to load GCode programs over serial, but this feature is trivially implemented. </p>
+            <p class="lead">The user interface is a simple serial text console. It currently features three commands: Cycle start, reset, and demo selection. Cycle start will begin running the loaded GCode program. Reset will move the CNC back to its home position and wait for a cycle start command. The demo selection allows the user to load one of the three demo programs pre-loaded onto the machine. Currently, there is no functionality to load GCode programs over serial, but this feature can be trivially implemented. </p>
             <p class="lead">A command is sent over the serial console as a string with the following format: <tt>$[command]&ltvalues&gt</tt>. The <tt>command</tt> field is a character corresponding to the desired command. The <tt>values</tt> field is an option string of data as required by the command specified. The following table shows the commands available:</p>
             <table class="table table-bordered">
             <thead>
@@ -242,7 +242,15 @@
                 <td>int</td>
               </tr>
             </tbody>
-          </table>
+            </table>
+
+            <h2 class="featurette-subheading">Circuits and Hardware</h2>
+
+            <img class="img-responsive vcenter pull-left" src="img/circuit_block.png" width="25%" height="25%" hspace="20">
+            <p class="lead">The controller was build with a few pieces of hardware. To th left is a block diagram of the electrical connections within the controller. All that is needed are the stepper motors and encoder for each axis, a limit switch for each axis, and a UART to USB adapter, such as the ones made by FTDI.</p>
+
+            <p class="lead">All of the circuits were implemented on a breadboard, but could easily be designed onto a custom PCB shield for the RaspberryPi using EAGLE CAD or Altium. </p>
+            <img class="img-responsive pull-right" src="img/electronics.jpg" width="40%" height="40%" hspace="20">
         </div>
 
         <hr class="featurette-divider">
