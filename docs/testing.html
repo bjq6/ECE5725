@@ -48,7 +48,7 @@
                         <a href="design.html">Design</a>
                     </li>
                     <li>
-                        <a href="testing.html">Testing</a>
+                        <a href="testing.html" style="color:#fff;background-color:#000">Testing</a>
                     </li>
                     <li>
                         <a href="results.html">Results</a>
@@ -98,15 +98,11 @@
 
             <h2>Bare Metal Startup</h2>
 
-            <p class="lead">One of the biggest testing challenges was testing the bare metal startup code. Without a direct GDB or JTAG debugger, stack traces and othe common debugging methods could not be used to find issues and ensure everything was working as expected. At first, the only debugging tools were the two LEDs on the RaspberryPi, which are hooked up to two GPIO pins. Once basic features like UART were implemented, serial debugging was added, which made things a lot easier.</p>
+            <p class="lead">One of the biggest testing challenges was testing the bare metal startup code. Without a direct GDB or JTAG debugger, stack traces and other common debugging methods could not be used to find issues and ensure everything was working as expected. At first, the only debugging tools were the two LEDs on the RaspberryPi, which are hooked up to two GPIO pins. Once basic features like UART were implemented, serial debugging was added, which made things a lot easier.</p>
 
             <h3>Issues</h3>
 
-            <p class="lead">Since half of the code for startup is written in assembly, every new feature presented a new set of difficult-to-find bugs. These included using hardware floating points, initializing interrupt handlers, and running multiple cores. Most of these issues were addressed through large print statements to occasionally dump register values, blinking LEDs when expected behavior occured, and feverishly searching the RaspberryPi Bare Metal forums and GitHub for examples of working code that accomplished the same goal as was desired. </p>  
-
-            <h2>Path Planning</h2>
-            <p class="lead">Path planning was developed piecewise to ensure that each part worked in step. GCode parsing was developed as a switch case statement. This made it rather easy to test parsing piecewise as it would fall into given cases and can be handled selectively. It generally worked as expected here.</p>
-            <p class="lead">Interpolation had the first main issue that needed to be worked out. As planning was developed before the bare metal environment was fully set up, floating point mathematics still took a long time. To get around this, the parser was developed to return <tt>int</tt>s which were not as computationally expensive. As floating point math is traditionally a problem with microcontrollers, the team used a function from the <a href="https://github.com/gnea/grbl">grbl</a> codebase, <tt>read_float</tt> to extract numbers from strings for integer math.</p>              
+            <p class="lead">Since half of the code for startup is written in assembly, every new feature presented a new set of difficult-to-find bugs. These included using hardware floating points, initializing interrupt handlers, and running multiple cores. Most of these issues were addressed through large print statements to occasionally dump register values, blinking LEDs when expected behavior occured, and feverishly searching the RaspberryPi Bare Metal forums and GitHub for examples of working code that accomplished the same goal as was desired. </p>                
 
             <h2>Motion Control Testing</h2>
             <p class="lead">Motion control was developed with incremental testing as new features were added. Each of the major milestones were: </p>
@@ -129,6 +125,12 @@
             <h3>Issues</h3>
 
             <p class="lead">The main issue discovered when developing motion control was encoder jitter. When stationary, the pulse width output by the encoder was not perfectly constant, but had small amounts of jitter. This, coupled with error in measurement, led to noise in the angle value. This, in turn, would cause the PID loop to try to componesate for the noise and start causing the axis to jitter slightly when it was supposed to be stationary.</p>
+
+            <h2>Path Planning</h2>
+            <p class="lead">Path planning was developed piecewise to ensure that each part worked in step. GCode parsing was developed as a switch case statement. This made it rather easy to test parsing piecewise as it would fall into given cases and can be handled selectively. It generally worked as expected here.</p>
+
+            <h3>Issues</h3>
+            <p class="lead">Interpolation had the first main issue that needed to be worked out. As planning was developed before the bare metal environment was fully set up, floating point mathematics still took a long time. To get around this, the parser was developed to return <tt>int</tt>s which were not as computationally expensive. As floating point math is traditionally a problem with microcontrollers, the team used a function from the <a href="https://github.com/gnea/grbl">grbl</a> codebase, <tt>read_float</tt> to extract numbers from strings for integer math.</p>
 
         </div>
 

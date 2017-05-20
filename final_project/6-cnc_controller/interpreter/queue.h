@@ -9,6 +9,8 @@ typedef struct {
 
 #define MAX 1000
 
+/*Modified from tutorialspoint.com - https://www.tutorialspoint.com/data_structures_algorithms/queue_program_in_c.htm*/
+
 typedef struct{
    vector vecArray[MAX];
    int front;
