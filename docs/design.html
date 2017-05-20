@@ -97,7 +97,7 @@
 
         <div class="featurette">
 
-            <h2 class="featurette-heading">Design and Initialization
+            <h2 class="featurette-heading">Design
                 <span class="text-muted"></span>
             </h2>
             <h2 class="featurette-subheading">RaspberryPi Bare Metal</h2>
@@ -110,7 +110,7 @@
             
             <h2 class="featurette-subheading">Startup and Initialization</h2>
             <p class="lead">The Raspberry Pi boots by starting the GPU, which loads the <tt>start.elf</tt> into the ARM processor, triggers a reset on the ARM processor, and begins running the <tt>kernel.img</tt>. The <tt>kernel.img</tt> is the actual program. </p>
-            <p class="lead">The RPi's ARM processor requires the start of the program to be at address memory 0x8000. As with any C program, the gcc linker looks for the <tt>_start</tt> section and makes that the start of the program. The linker handles and memory map file handle placing the <tt>_start</tt> section at the proper memory address. The program begins in the <tt>vector.s</tt> assembly program. Here you will find the <tt>_start</tt> label. This code does the following:</p>
+            <p class="lead">The RPi's ARM processor requires the start of the program to be at address memory 0x8000. As with any C program, the gcc linker looks for the <tt>_start</tt> section and makes that the start of the program. The linker and memory map file handle placing the <tt>_start</tt> section at the proper memory address. The program begins in the <tt>vector.s</tt> assembly program. Here you will find the <tt>_start</tt> label. This code does the following:</p>
             <ol>
                 <li>Set up interrupt vectors.</li>
                 <li>Initialize the stack pointers for IRQ mode and Supervisor mode.</li>
@@ -191,15 +191,15 @@
             <br>
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <img class="featurette-image img-rounded img-responsive vcenter" src="img/linear.png">
                     <h4>Linear Interpolation for GCode G00, G01</h4>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <img class="featurette-image img-rounded img-responsive vcenter" src="img/circular.png">
                     <h4>Circular Interpolation for GCode G02, G03</h4>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <img class="featurette-image img-rounded img-responsive vcenter" src="img/radial.png">
                     <h4>Circular Interpolation Graphic</h4>
                 </div>
