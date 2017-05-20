@@ -117,6 +117,9 @@
                 <li>Initialize the NEON VFP (hardware floating point unit)</li>
                 <li>Call the C main function <tt>kernel_main</tt></li>
             </ol>
+
+            <img class="img-responsive vcenter pull-right" src="img/arm_startup.png" width="50%" height="50%">
+            
             <p class="lead">The very first thing the program does is set up the Interrupt Vector Table (IVT). Whenever the processor generates an exception (an interrupt), it will look up where the interrupt handler is stored in the IVT. After a reset, the reset exception is generated, so a reset handler is defined which contains all of the startup code. The handler calls an initialization function(<tt>_init_core</tt>), then calls the C function <tt>kernel_main</tt>, which is the actual code for the program. The rest of the assembly program defines convenience functions for interacting with registers, enabling/disabling the IRQ handler, and the IRQ handler itself. </p>
             <p class="lead">Once the main kernel function is called by the startup code, it runs a higher level initialization function to turn on other peripherals, such as the UART and ARM Timer. At this point, code is application specific and not necessarily required for the processor to run. </p>
             
