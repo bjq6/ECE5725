@@ -29,7 +29,7 @@ bool find_first(char str[], char c, int * ptr);
 bool read_num(char str[], char c, float * ptr);
 
 
-/*  	From grbl's nuts_bolts file for reading floats
+/*  	From grbl's nuts_bolts file for reading floats - https://github.com/gnea/grbl
  */
 uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr);
 

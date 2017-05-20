@@ -25,6 +25,7 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 
 	    switch(letter) {
 
+	    	//Currently only supports GCode, could be extended to support other commands
 	      case 'G':
 	      	switch(int_value) {
 	      		case 0: //  RAPID        LINEAR    MODE
@@ -34,7 +35,7 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 	      			*g_code = int_value;
 	      			break;
 	      		default:
-	      			printf("We do not support G%i codes. Sorry, try again next semester.\n",int_value);
+	      			printf("Does not support G%i codes. Sorry, try again next semester.\n",int_value);
 	      	}
 	      	break; // End G block
 	      default:
@@ -46,7 +47,7 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 	      		case 'Y': victor->y = value; break;
 	      		case 'Z': victor->z = value; break;
 	      		default:
-	      			printf("Didn't know what to do with letter '%c'.\n",letter);
+	      			printf("Does not support '%c'Codes.\n",letter);
 	      	}
 	    }
 	}
@@ -54,10 +55,12 @@ bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector *
 } 
 
 void process_linear(queue * pos_q, vector * dest, vector * init){
+	/* Calculates distance from current point to destination point. Calculates number of steps needed*/ 
 	float dx = dest->x-init->x, dy = dest->y-init->y, dz = dest->z-init->z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	int num_steps = dist/STEP_SIZE;
 
+	/*Creates a linear interpolation for each step from init to destination*/
 	for (int n=0;n<num_steps+1;n++){
 
 		vector pos_step = {init->x+(n*dx)/num_steps, init->y+(n*dy)/num_steps, init->z+(n*dz)/num_steps};
@@ -67,25 +70,31 @@ void process_linear(queue * pos_q, vector * dest, vector * init){
 }
 
 void process_circular(queue * pos_q, vector * dest, vector * init, float r, int cc){
+	/* Calculates distance from current point to destination point. Calculates number of steps needed*/ 
 	float dx = dest->x-init->x, dy = dest->y-init->y, dz = dest->z-init->z;
 	float dist = sqrt(dx*dx + dy*dy + dz*dz);
 	float theta = 2*asin(.5*dist/r);
 	float arc_dist = r*theta;
 	float d = dist/2;
 
+	/*Creates a chord from init to destination - used to find origin of the circle*/
 	float mid_x = (dest->x+init->x)/2;
 	float mid_y = (dest->y+init->y)/2;
 
+	/*Finds hypotenuse*/
 	float h = sqrt(r*r - d*d);
 
+	/*Number of steps and change in theta for each step*/
 	int num_steps = arc_dist/STEP_SIZE;
 	float theta_per_seg = theta/num_steps;
 
+	/*Finds the origin of the circle*/
 	float x_o = mid_x + cc*h*dy/dist;
 	float y_o = mid_y - cc*h*dx/dist;
 
 	float alpha = atan2(init->y-y_o, init->x-x_o);
 
+	/*Creates a circular interpolation for each step from init to destination*/
 	for (int n=0;n<num_steps+1;n++){
 		float beta = alpha-cc*n*theta_per_seg;
 		vector pos = {x_o + r*cos(beta), y_o + r*sin(beta)};
@@ -94,6 +103,7 @@ void process_circular(queue * pos_q, vector * dest, vector * init, float r, int 
 	
 }
 
+/*Reads and prints a file - used for testing, not in main*/
 void read_file(char* fileName){
     FILE* file = fopen(fileName, "r"); 
     char line[256];
@@ -105,6 +115,8 @@ void read_file(char* fileName){
     fclose(file);
 }
 
+
+/*Only used in testing*/
 /*
 int main(){
 	char lin[] = "G01 X02 Y3";

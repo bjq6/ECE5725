@@ -19,9 +19,13 @@ typedef int bool;
 //bool read_line(char * line, int * g_code, float * f_val, float * r_val, float * x_val, float * y_val, float * z_val);
 bool read_line(char * line, int * g_code, float * f_val, float * r_val, vector * victor);
 
+/*Reads a file and prints each line to the terminal - used for testing*/
 void read_file(char* fileName);
 
+/*Pushes positions for each step to pos_q queue given the initial position and end position*/
 void process_linear(queue * pos_q, vector * dest, vector * init);
+
+/*Pushes positions for each step to pos_q queue given the initial position and end position, a radius and direction*/
 void process_circular(queue * pos_q, vector * dest, vector * init, float r, int cc);
 
 #endif

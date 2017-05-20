@@ -15,7 +15,7 @@ void FAIL(char * status) {
 
 bool find_first(char str[], char c, int * ptr){
 
-  	char * pch;
+  char * pch;
 	pch = strchr(str,c);
 	int i =  pch-str;
 	*ptr = i;
@@ -23,6 +23,7 @@ bool find_first(char str[], char c, int * ptr){
 
 }
 
+/*From grbl nuts_bolts.c - https://github.com/gnea/grbl*/
 uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr)
 {
   char *ptr = line + *char_counter;
